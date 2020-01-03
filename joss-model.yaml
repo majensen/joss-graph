@@ -1,0 +1,254 @@
+Nodes:
+  person:
+    UniqueKeys:
+      - [ 'handle' ] # Github handle
+    Props:
+      - real_name
+      - handle
+      - orcid
+      - email
+      - affiliation
+  language:
+    UniqueKeys:
+      - ['name']
+    Props:
+      - name
+  topic:
+    UniqueKeys:
+      - ['name']
+    Props:
+      - name
+  submission: # not 'paper' - paper is a published submission
+    UniqueKeys:
+      - ['doi']
+    Props:
+      - title
+      - joss_doi
+      - repository
+      - prerev_issue
+      - review_issue
+      - disposition
+  paper:
+    UniqueKeys:
+      - ['archive_doi']
+    Props:
+      - title
+      - joss_doi
+      - archive_doi
+      - url
+      - published_date
+      - volume
+      - issue
+  # assignments are events - create a new one for each person assigned
+  # to a submission
+  assignment:
+    UniqueKeys:
+      - ['id']
+    Props:
+      - role
+      - date
+  event:
+    Props:
+      - disposition
+      - updated_date
+  rev_snapshot:
+    Props:
+      - updated_date
+      - active
+      - all_time
+      - last_year
+      - last_quarter
+
+Relationships:
+  author_of:
+    Mul: many_to_many
+    Ends:
+      - Src: person
+        Dst: submission
+  reviewer_of:
+    Mul: many_to_many
+    Ends:
+      - Src: person
+        Dst: submission
+  editor_of:
+    Mul: one_to_many
+    Ends:
+      - Src: person
+        Dst: submission
+  eic_of:
+    Mul: one_to_many
+    Ends:
+      - Src: person
+        Dst: submission
+  assigned_by:
+    Mul: many_to_one
+    Ends:
+      - Src: assignment
+        Dst: person
+  assigned_to:
+    Mul: many_to_one
+    Ends:
+      - Src: assignment
+        Dst: person
+  assigned_for:
+    Mul: many_to_one
+    Ends:
+      - Src: assignment
+        Dst: submission
+  has_preferred_language:
+    Mul: many_to_many
+    Ends:
+      - Src: person
+        Dst: language
+  has_additional_language:
+    Mul: many_to_many
+    Ends:
+      - Src: person
+        Dst: language
+  has_preferred_topic:
+    Mul: many_to_many
+    Ends:
+      - Src: person
+        Dst: topic
+  has_primary_topic:
+    Mul: many_to_one
+    Ends:
+      - Src: submission
+        Dst: topic
+  has_secondary_topic:
+    Mul: many_to_many
+    Ends:
+      - Src: submission
+        Dst: topic
+  has_snapshot:
+    Mul: one_to_many
+    Ends:
+      - Src: person
+        Dst: rev_snapshot
+  from_submission:
+    Mul: one_to_one
+    Ends:
+      - Src: paper
+        Dst: submission
+  uses_language:
+    Mul: many_to_many
+    Ends:
+      - Src: submission
+        Dst: language
+  next:
+    Mul: one_to_one
+    Ends:
+      - Src: event
+        Dst: event
+  occurred_to:
+    Mul: many_to_one
+    Ends:
+      - Src: event
+        Dst: submission
+  updated_by:
+    Mul: one_to_one
+    Ends:
+      - Src: event
+        Dst: person
+PropDefinitions:
+  real_name:
+    Desc: person real name
+    Type: string
+  handle:
+    Desc: person github handle (no at-sign)
+    Type:
+      pattern: ^[A-za-z0-9_]+$
+  email:
+    Type:
+      pattern: ^.+$ # email
+  orcid:
+    Type:
+      pattern: ^.+$ # orchid re
+  name:
+    Desc: generic
+    Type: string
+  affiliation:
+    Desc: institute, university, company, etc
+    Type: string
+  title:
+    Desc: paper title
+    Req: true
+    Type: string
+  date:
+    Desc: a date
+    Type: datetime
+  role:
+    Desc: a person's role on submission
+    Enum:
+      - author
+      - submitter
+      - reviewer
+      - editor
+      - eic
+  joss_doi:
+    Desc: JOSS DOI
+    Nul: true
+    Type:
+      pattern: ^.+$ # better one
+  archive_doi:
+    Desc: archive (like Zenodo)DOI
+    Nul: true
+    Type:
+      pattern: ^.+$ # better one
+  repository:
+    Desc: Github or other url
+    Req: true
+    Type: url
+  prereview_issue:
+    Desc: joss_reviews issue number
+    Req: true
+    Type: integer
+  review_issue:
+    Desc: joss_reviews issue number
+    Nul: true
+    Type: integer
+  submitted_date:
+    Req: true
+    Type: datetime
+  published_date:
+    Nul: true
+    Type: datetime
+  updated_date:
+    Req: true
+    Type: datetime
+  disposition:
+    Req: true
+    Desc: current disposition of submission
+    Enum:
+      - review_pending
+      - under_review
+      - paused
+      - accepted
+      - published
+      - withdrawn
+      - rejected 
+      - closed # issue closed but not labeled with official dispo
+      - prv_closed # issue closed but not labeled with official dispo
+      - rv_closed # issue closed but not labeled with official dispo
+  url:
+    Desc: a URL
+    Type: url
+  active:
+    Desc: number of active reviews as of updated_date
+    Type: integer
+  all_time:
+    Desc: all-time number of reviews as of updated_date
+    Type: integer
+  last_year:
+    Desc: number of reviews in last year as of updated_date
+    Type: integer
+  last_quarter:
+    Desc: number of reviews in last qtr as of updated_date
+    Type: integer
+  volume:
+    Desc: journal volume number
+    Type: integer
+  issue:
+    Desc: journal issue number
+    Type: integer
+    

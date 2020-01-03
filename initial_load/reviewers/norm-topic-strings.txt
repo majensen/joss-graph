@@ -1,0 +1,1173 @@
+big data
+& tools numerical solution of pdes performance analysis & performance engineering tools multi-physics frameworks & applications legacy application refactoring tools parallel & pgas runtimes/rtls package managers macos tools & utilities
+3d analysis and visualization
+3d modelling
+3d visualization geophysics geoscience
+[deep] machine learning artificial intelligence natural language processing computational linguistics computational neuroscience computer vision reinforcement learning digital signal processing virtual reality
+absorption
+acoustics
+adaptive sampling
+aerodynamics optimization
+aerospace
+aerospace engineering
+agent based models
+agent oriented programming
+agent-based modeling computational biology bioinformatics
+agent-based models
+agile development
+aging
+agriculture
+ai
+ai and ml
+ai genetic algorithms neural netowork big data machine learning deep learning
+air pollution
+algebra
+algorithm libraries
+algorithms
+algorithms visualizations
+all
+analysis of algorithms synthetic biology computer arithmetic logic synthesis formal methods
+analysis of sequencing data
+analytical chemistry
+analytics
+and chemistry.  from a computing perspective
+and topological data analysis statistical modeling bibliometry
+anomaly detection
+anomaly detection natural language processing graph methods
+anthropology
+anything
+anything having to do with social media data and news data
+anything statistics
+api wrappers
+apis
+app dev
+applications in health services research data visualisation applied statistical methods
+applied machine learning
+applied mathematics
+applied mathematics computational biology bayesian statistics/inference data science machine learning
+applied mathematics dynamical systems differential equations
+arbitrary/lagrangian meshes
+archaeology
+architecture
+artificial intelligence
+artificial intelligence machine learning
+artificial intelligence machine learning computer vision transportation
+artificial intelligence machine learning optimization evolutionary algorithms teaching programming neural networks
+asdasd
+assessment
+assumptions
+asteroids
+astrodynamics
+astronomical pipelines
+astronomy
+astronomy & astrophysics
+astronomy & astrophysics physics statistics machine learning high performance computing
+astronomy & astrophysics scientific workflow management sowftware characterisation and profiling
+astronomy and astrophysics
+astronomy and machine learning
+astronomy astrophysics
+astronomy astrophysics cosmology
+astronomy astrophysics physics fluid dynamics stiff ode solvers
+astronomy computer science machine learning
+astronomy cryptography computational number theory
+astronomy data analysis
+astronomy general open-source
+astronomy ipywidgets
+astronomy physics web technologies cloud technologies machine learning
+astronomy pipeline
+astronomy/astrophysics
+astronomy/astrophysics physics machine learning/deep learning
+astronomy/astrophysics: spectroscopy
+astroparticle physics
+astroparticle physics dark matter particle physics
+astrophysical simulations or data analysis. statistical methods for data modelling in physics. computational fluiddynamics
+astrophysics
+astrophysics cosmology numerical analysis statistics
+astrophysics/astronomy
+astrostatistics
+asttronomy/astrophysics
+atmospheric science
+atmospheric science physics
+atmospheric sciences
+audio
+audio/music processing
+automotive
+aviation air traffic management data science machine learning optimisation research geographic information systems
+bacterial genomics
+basic physics
+bayesian inference
+bayesian methods
+bayesian modelling bayesian machine learning financial data science financial machine learning probabilistic programming quantitative finance
+bayesian statistic
+bayesian statistics
+bayesian statistics computer games ai
+bayesian statistics postestimation data visualization
+bayesian statistics spatial/gis
+bayesian statistics statistical image analysis spatial statistics disease mapping markov chain monte carlo age-period-cohort models
+bdi agent programming languages
+behaviour ecology
+behavioural tasks
+big data
+bim
+biochemistry
+biodiversity informatics bioinformatics systematics taxonomy evolution palaeontology
+bioengineering
+biofinromatics
+bioinformatic tools sequence processing and handling sequence correction assembly tools
+bioinformatics
+bioinformatics  computational biology
+bioinformatics cheminformatics computational biology computational chemistry
+bioinformatics computational biology
+bioinformatics computational biology genomics
+bioinformatics computational biology machine learning data mining
+bioinformatics computational biology sequence analysis genome analysis evolution ecology
+bioinformatics computational biology systems biology general stats and machine learning when i understand it :)
+bioinformatics computer science algorithmics
+bioinformatics containerization docker singularity reproducibility and replicability scientific computer python
+bioinformatics data visualization data processing jupyter sequencing classification regression
+bioinformatics genetics genomics gene expression
+bioinformatics genetics systems biology biostatistics
+bioinformatics genome assemblies sequence algorithm
+bioinformatics genomics computational biology plant science biology
+bioinformatics genomics computational biology sensors reproducible research markdown/rmd/family machine learning
+bioinformatics genomics immunology
+bioinformatics genomics metagenomics pathogen genomics  human genomics
+bioinformatics genomics microbiology genetics
+bioinformatics genomics sequence analysis microarray ngs next generation sequecning
+bioinformatics image analysis
+bioinformatics mass spectrometry geobiology biogeochemistry
+bioinformatics metagenomics
+bioinformatics microbial genomics
+bioinformatics phylogenetics
+bioinformatics phylogenetics genomics
+bioinformatics regulatory genomics machine learning
+bioinformatics statistical modelling
+bioinformatics tools/packages
+bioinformatics/computational biology
+bioinspired
+biological sciences
+biology
+biology genomics
+biomechanics
+biomechanics musculoskeletal modeling data visualisation
+biomechanics physiology kinesiology
+biomechanics physiology sensor i/o signal processing image processing 3d meshing
+biomechanics robotics
+biomedical
+biomedical engineering
+biometrics and database
+biophysics
+biosignal-processing optimization combinatorics constraint-satisfaction image-processing
+biostatistics
+biostatistics bioinformatics epidemiology public health
+biostatistics data visualization statistical computing
+biostats
+biostats epidemiology
+biotatistics
+biotech
+birds
+blockchain related research
+boundary layer meteorology
+brain
+but making sure that a new user can quickly and easily get the results they want.
+but particularly earth and environmental sciences
+cartography
+causal inference
+celestial mechanics
+cellular automata
+cfd
+cfd model reduction numerical solution of odes/pdes in general
+chaos theory nonlinear dynamics complex systems quantum mechanics tight-binding solid state physics
+chem comp
+chemical engineering
+chemical engineering mixing computational fluid dynamics
+chemical evolution
+chemical kinetics
+cheminformatics
+chemistry
+chemistry chemical physics electronic structure quantum mechanics
+chemistry instrumentation spectroscopy
+chemistry molecular dynamics
+chemistry physics
+chemistry spectroscopy electronics instrumentation
+chemometrics machine learning multivariate statistics
+civil engineering
+cli tools
+climate
+climate and hydrology
+climate change
+climate modeling
+climate science
+clinical informatics
+cloud
+cloud computing
+cloud computing data science social media
+cloud computing hpc distributed systems data management machine learning
+clustering
+cmb foregrounds
+coastal coastal geomorphology
+cognitive and computational neuroscience
+cognitive modeling
+cognitive/behavioral science online/browser-based data collection open data/open science process-level data analyses and preprocessing/data wrangling
+collaborative filtering
+collection and manipulation network visualisation
+colorimetry
+colour vision
+combinatorics
+combustion
+communication
+competitive programming
+compiler tools
+complex data
+complex diseases
+complex networks
+complex systems
+compressed sensing
+computation
+computational and systems biology
+computational biology
+computational biology bioinformatics data science data visualization
+computational biology educational research
+computational biology genomics data science
+computational biology genomics modeling machine learning cancer research
+computational biology machine learning statistics deep learning optimization computational chemistry bioinformatics cheminformatics data science
+computational biology plant science phenotyping genotyping quantitative trait modelling systems biology microscopy data analysis computer vision machine learning
+computational biophysics
+computational cardiology
+computational chemistry
+computational chemistry biophysics high performance computing automation
+computational chemistry computational physics
+computational chemistry molecular simulation
+computational chemistry quantum chemistry molecular dynamics high performance computing application fault tolerance
+computational chemistry/biochemistry
+computational disease modeling
+computational electromagnetics finite element methods
+computational engineering
+computational fluid dynamics
+computational fluid dynamics  fortran tools
+computational fluid dynamics  mathematical modelling mechanical engineering chemical engineering automatic differentiation
+computational fluid dynamics numerical methods
+computational fluid dynamics stratocumulus cloud models complex systems models
+computational geometry
+computational geometry/ computer graphics
+computational geometry/algebra
+computational hydraulics
+computational hydrodynamics
+computational linguistics
+computational material physics
+computational material science
+computational materials science
+computational materials sicence
+computational methods
+computational neuroscience
+computational neuroscience model simulators modeling machine learning artificial neural networks neuroinformatics bioinformatics biophysics biology neurobiology
+computational neuroscience simulation technology
+computational physics
+computational physics monte-carlo tight-binding path-integrals
+computational physics nonlinear dynamics engineering science and mechanics
+computational physics numerical methods machine learning molecular dynamics enhanced sampling biophysics
+computational science
+computational science and engineering & high-performance computing
+computational science data science machine learning applied statistics visualization
+computational social science
+computational statistical mechanics
+computational statistics
+computer aided design
+computer algebra
+computer architecture
+computer graphics
+computer graphics evolutionary computation
+computer networking
+computer networks.
+computer science
+computer science - expertise in: software defined networks and related topics
+computer science machine learning bioinformatics systems dynamics
+computer science; algorithms; computational geometry; computational biology; computational chemistry
+computer security
+computer visio
+computer vision
+computer vision data minirg machine learning cfd aerodynamics
+computer vision differentiable programming
+computer vision robotics navigation ai data analysis control
+condensed matter
+condensed matter physics
+confidence intervals
+conflict
+construction
+container
+control systems
+control systems dynamics numerical methods optimization
+copyleft wikimedia
+copyright
+corporate finance
+cosmological parameter estimation
+cosmology
+criminology
+cryosphere
+cryptography
+crystallography
+cyber security
+cyber security web development api development
+data
+data analysis
+data analysis and visualization
+data analysis data mining statistics
+data analytics
+data cleaning
+data collection
+data collection neutron data reduction tomography/imaging high performance computing
+data engineering
+data management
+data management and manipulation
+data manipulation
+data mining
+data modeling and munging
+data munging
+data processing
+data processing esp. astrophysics
+data science
+data science computer vision machine learning
+data science data visualization
+data science data visualization scientometrics bibliometrics informetrics ecology
+data science knot theory
+data science machine learning surrogate model design of experiments statistics computational fluid dynamics
+data science text mining
+data software
+data structures
+data visualisation
+data visualization
+data visualization graphical user interface parallelization mpi climate science earth sciences
+data wrangling
+database development
+databases
+datavis
+deep learning
+delaunay triangulations
+dense linear algebra
+detector physics
+devops
+devsecops
+dft
+differential equations
+differential equations / numerical methods
+diffraction
+digital humanities
+digital humanities computational philosophy
+digital image correlation
+digital signal processing
+dimension reduction
+dimensionality reducation
+discrete-event simulation
+distributed algorithms
+distributed computing
+distributed systems
+distributed systems high-throughput data processing mapreduce image and signal processing linear algebra data management microscopy
+distributed systems medical imaging big data
+django
+dna metabarcoding
+document production
+documentation
+documentation community project management continuous deployment databases web standards accessibility diversity education non profit music nlp humanities latex sphinx  markdown markup languages
+drones
+dsmc
+dynamical systems
+dynamical systems odes pdes nonlinear waves
+dynamics
+earth and climate science
+earth science
+earth surface processes
+earth system science
+earthquake deformation  tectonics: repeating earthquakes
+earthquake swarm
+ecological modeling model frameworks social models quantitative archaeology oceanography
+ecology
+ecology and evolution phylogenetics algorithms omics
+ecology biology agriculture
+ecology data packaging data cleaning data manipulation
+ecology ecological modelling ecological statistics applied statistics
+ecology environmental science geospatial limnology data access/wrapping existing apis
+ecommerce
+econometrics
+economics
+economics finance
+economics game theory matching algorithms
+education
+educational assessment and psychometrics
+educational research
+educational software
+eeg
+effect size
+electrical engineering rf/microwave engineering radio astronomy instrumentation sis mixers
+electrochemistry
+electrochemistry; renewable energy; transportation; li-ion batteries; electric vehicles
+electromagnetic
+electromagnetic methods geophysical exploration
+electronic structure
+electronics
+electrophysiology
+embedded system
+embedded systems
+embedded systems computer vision
+emissions
+emphasis on materials modeling/simulation
+energy
+energy engineering
+energy storage materials
+energy system optimisation demand modelling
+energy systems environmental science web scraping data analysis visualisation
+engineering
+engineering computer science databases reproducibility
+engineering design
+enhancer biology
+enterprise portals
+environment
+environmental modeling
+environmental science
+environmental science pharmacology system biology
+epidemiology
+epidemiology biostatistics cancer research applications
+epidemiology biostatistics health informatics evolutionary computation
+epidemiology infectious disease
+epidemiology pediatrics community health
+epidemiology public health medicine statistic
+epidemiology spatial statistics
+epigenetics
+epigenomics
+esp. immigration / comparative politics . behavioral politics
+esp. public opinion.
+especially condensed matter
+especially processing of microscopic images
+especially x-ray
+estimation regression kernel methods combinatorial structures markov processes
+etc.
+etc. network analysis
+ethics in code
+euroimaging
+evolutionary algorithms
+evolutionary biology
+exoplanets
+experiment building
+experiment data analysis
+experimental design
+exploratory data analysis
+eyetracking
+face recognition/perception
+factor analysis
+fast transforms
+feature extraction in satellite imagery or topographic data
+fem
+fiber optic sensors evolutionary computation
+file formats
+finance
+finance economics  data envelopment analysis  banking
+finance machine learning signal processing optimisation
+finance/economics: option pricing
+finite element analysis computational fluid dynamics fluid-structure interaction structural dynamics
+finite element methods
+finite element simulation
+finite volume methods
+fluid dynamics
+fluid flow imaging
+fluid mechanics
+fluid mechanics atmospheric sciences oceanography scientific computing numerical methods
+fluvial geomorphology; tectonic geomorphology; sediment production
+fmri
+forensics
+formal approaches to vagueness
+formal logic
+formal verification operating systems programming language runtimes virtualization compilers
+frameworks
+frequentist statistics machine learning data tidying/manipulation data visualization
+functional mri
+galaxies
+game dev
+game theory
+gc-ms
+gene expression
+gene regulation
+general programming aerospace engineering cybersecurity cryptography cryptocurrency autonomy
+general relativity
+general science
+general software development and data science tools/topics
+generalized additive models
+generalized linear models
+generic computer science
+genetic algorithms
+genetics
+genetics genomics bioinformatics big data structural variation
+genetics genomics computational biology bioinformatics protein science
+genetics text analysis statistics biostatistics bioinformatics data science systems genetics
+genomic epidemiology bioinformatics in public health
+genomics
+genomics 3d genome organisation chromatin chromatin modifications histone modification chromatin conformation
+genomics bioinformatics
+genomics computational immunology machine learning
+genomics document analysis
+genomics general computational biology
+genomics population genetics structural bioinformatics general bioinformatics
+geo spatial  orbital calculations visualisation data processing
+geocomputation
+geodesy
+geodesy: insar
+geodynamics geophysics geology earth sciences
+geodynamics geosciences high-perfomance computing finite-element methods particle methods
+geographic science urban morphology network analysis geospatial gis
+geography
+geography visualisation network science
+geoinformatics
+geology
+geology geoscience
+geometric manipulation numerical methods
+geometric modeling
+geomorph
+geomorphology
+geomorphology geology
+geophysical modelling.
+geophysics
+geophysics / geoscience
+geophysics geodesy gis geospatial analysis
+geophysics inverse theory optimization finite volume structural geology modelling
+geophysics petrophysics geomechanics
+geophysics sampling geostatistics inversion
+geoscience
+geoscience ecology evolutionary biology high-performance computing computer science
+geoscience geology
+geoscience; climate science; oceanography
+geosciences
+geosimulations
+geospace
+geospatial
+geospatial data management
+geospatial information systems
+geospatial tools
+geostatistics
+geotechnical
+gis
+glaciology
+global models others: sensitivity analysis
+google earth engine
+gps
+gpu computing
+gpu parallel imaging machine vision machine learning artificial intelligence tools utilities efficiency
+gpu solar
+graph algorithm
+graph algorithms
+graph theory
+graph theory geometric
+graphics / data viz
+graphs
+graphs and network theory
+gravitational waves
+gravitational-waves/astronomy
+gravity
+health
+health and medicine
+health care research
+health domain
+health informatics
+health; healthcare; health services; medicine;
+healthcare
+healthcare/ healthit
+heliophysics
+heliophysics solar physics
+hierarchical linear models
+high energy density physics
+high energy physics
+high performance computing
+high performance computing computer science web
+high performance networking distributed computing
+high-energy physics
+high-energy x-ray diffraction crystal plasticity finite element dislocation dynamics
+high-performance computing
+high-performance computing numerical algorithms compilers
+higher education
+hii regions
+history
+hospital
+hpc
+hpc chemistry materials science
+hpc mpi openmp validation testing
+hpc social networks phylogenetics statistics
+htmlwidgets
+human factors
+humanities
+hydrodynamics
+hydrogeology
+hydrology
+hypervisor
+i'm interested in making sure that r packages for modelling have useful and intuitive interfaces and documentation. i'm not interested in double checking theory and correctness
+i'm strongest in information/data architecture and back-end.
+ict  emerging technologies advancement in programming languages use of ai and open source in climate change open source software
+image analysis
+image classification
+image processing
+image processing bioimage informatics computational neuroscience
+image processing in earth sciences
+image processing inverse problems machine learning optimization signal processing
+imaging
+including cleaning
+industrial ecology multi regional input output analysis  life cycle assessment  other quantitative sustainability software economics
+infectious diseases
+inference
+inference algorithms
+inferential statistic
+information retrieval
+information theory
+information visualization
+infrastructure
+instrument control
+instrumentation
+international safeguards techniques
+international trade
+internet of things
+internet of things machine learning
+interpretable/explainable machine learning
+inverse problems
+inversion.
+io
+iot
+iterative solvers
+keras
+kinetics
+kubernetes docker containers cloud computing virtualization
+land use/land cover
+large facilities
+latent variable models
+latex
+lc-ms
+libraries
+library and information science internet digital rights
+lidar
+life sciences
+limnology
+linear algebra
+linear models additive models mixed models bayesian inference functional data analysis dimension reduction methods spatial data analysis
+linear systems
+linguistics
+linguistics digital humanities  software sustainability
+linguistics nlp neuroimaging digital humanities text analysis experimental survey software etc
+linux
+linux containers  web and cloud infrastructure hpc informatics and neuroinformatics image processing machine learning
+linux encryption privacy shell scripting software licensing ruby
+linux linux distribution debian packaging
+logic
+logic programming
+machine learning
+machine learning and related mathematics
+machine learning bayesian statistics julia packages physics simulators
+machine learning big data analytics  computer vision natural language processing
+machine learning bioinformatics cheminformatics drug discovery variable selection high-dimensional data biological sequence analysis
+machine learning biomedical image analysis computational pathology
+machine learning clustering networks visualisation statistics inference
+machine learning computational neuroscience
+machine learning data mining data visualization sport analytics
+machine learning data mining ensemble learning outlier detection machine learning libraries
+machine learning data science computing science framework
+machine learning data science healthcare biomedical text mining classification support vector machine deep learning
+machine learning data science natural language processing
+machine learning database web programming algorithms network science
+machine learning deep learning embedded system
+machine learning evolutionary algorithms complex systems artificial life
+machine learning for other domains as well
+machine learning natural language processing computer vision data visualization
+machine learning neural networks deep learning recommender systems computer vision usability
+machine learning neural networks novelty detection pattern recognition unsupervised learning
+machine learning pattern recognition medical imaging
+machine learning signal processing linear algebra optimization
+machine learning statistics
+machine learning statistics information theory neuroscience
+machine learning text analytics predictive modeling physics acoustics material science instrumentation  sensors
+machine learning topological data analysis computational topology mathematics
+machine learning; data mining; global optimization
+machine translation
+machine vision
+machine-learning
+macroevolution
+magnetic resonance imaging acquisition and reconstruction methods
+magnetics
+magnetohydrodynamics
+many body condensed matter physics solid state physics
+mapping
+mapping lca
+marine conservation
+market microstructure
+mass spectrometry
+massively scalable software
+material science
+materials informatics
+materials science
+materials science computational chemistry chemistry density functional theory
+materials science condensed matter physics chemical kinetics physical chemistry
+materials science inorganic chemistry computational chemistry materials informatics
+materials science thermodynamics solid state physics
+math
+mathematical goesciences
+mathematical libraries physics profiling and performance optimisation
+mathematical logic
+mathematical modeling
+mathematical modelling
+mathematical optimization
+mathematical software
+mathematical techniques
+mathematics
+mathematics  epidemiology
+mathematics computer science
+mathematics computer science compilers translators interpreters algorithms computer vision data science
+maths
+matrix factorization
+mcmc
+measurement
+measurement models
+mechanical engineering
+mechatronics
+mediawiki
+medical imaging
+medical imaging and processing
+medical imaging image processing/restoration magnetic resonance imaging neuroimaging
+medical imaging image segmentation 3d printing
+medicine
+medicine bioinformatics ontologies clinical informatics
+medicine public health epidemiology biostatistics surgery
+medicine/health biostatistics/epidemiology topological data analysis mathematical oncology data visualization
+meshing
+meshless methods  meshfree methods radial basis functions rbf-fd computational geophysics computational geology
+meta-analysis.
+metabolomics
+metagenomics
+metaprogramming
+meteorology
+metocean data processing general numeric / scientific programming
+microbiology
+microbiology phylogenetics evolution metagenomics comparative genomics
+microbiome
+microscopy
+microservices
+middleware web uis monitoring/performance
+missing data
+missing values
+mixed layer oceanography
+ml
+mle
+model checkers
+model-driven engineering
+modeling and simulation
+modelling
+molecular biology
+molecular dynamics
+molecular dynamics simulation
+molecular dynamics simulation computational chemistry agent based models
+molecular dynamics simulations theoretical computational chemistry ice nucleation phase transitions computational geometry graph theory computational optics
+molecular dynamics virtualization hpc web platforms finite element methods optimization computer geometry
+molecular ecology
+molecular graphics
+molecular informatics
+molecular modeling
+molecular simulation
+molecular simulation and analysis biophysics systems biology biochemical networks information theory bayesian inference parameter estimation model selection
+molecular simulation molecular dynamics high performance computing
+monte carlo finance/economics deep learning  time series graphical models
+most things with a science application
+mpi
+multi-material flow.
+multibody dynamics
+multilevel modeling
+music
+nanophysics
+nanoscience
+natural computing/evolutionary algorithms optimization data science machine learning
+natural language processing
+natural language processing text mining xml database
+nbody
+network
+network analysis
+network science
+network security
+network theory computational genomics
+network visualization systems biology ode models rule-based modeling
+networking
+networking systems mobile wireless communications
+networking/data science
+networks
+networks computational biology bioinformatics scholarly communications
+neural networks
+neuroimaging
+neuroimaging / mri
+neuroinformatics. fmri data analysis. data quality control.
+neurology
+neuromorphic
+neuroscience
+neuroscience psychology
+neuroscience psychology cognitive science statistics
+neuroscience/psychology/cognitive science
+neurosciences
+neutron scattering
+neutron science
+ngs
+ngs/genome analysis
+nlp
+not sure i have a preference. i want to code-review to try to catch things like "glob.glob"
+nuclear engineering
+nuclear fuel cycles
+numerical algorithms
+numerical analysis
+numerical integration
+numerical linear algebra
+numerical methods
+numerical modeling data analysis
+numerical modelling
+numerical modelling cfd
+numerical simulation physics
+numerical software
+numerical solution of odes
+numerics
+nutrition
+oceanography
+oceanography earth and planetary sciences geophysical fluid dynamics
+oceanography geophysical fluid dynamics
+oceanography geosciences machine learning
+oceanography marine technology geophysics
+omics analyses
+online research
+open data
+open source licensing
+openmp
+operating systems
+operating systems hydrology topics - expertise: groundwater
+operations research
+optics
+optics physics
+optimal control
+optimization
+optimization algorithms.
+optimization and optimal control
+optimization machine learning privacy
+orbital mechanics
+ordinary differential equations
+organic electronics
+other f# projects after taking a first look.
+other physics depending on complexity
+packages data visualization geometry
+parallel cloud computation
+parallel codes
+parallel computing
+parallel computing numerical analysis
+parallel numerical software
+parallel programming
+parallel programming models scientific software gpus
+parsers
+partial differential equations
+particle physics
+particle simulation
+pathways
+pattern recognition
+pattern recognition numerical analysis geoinformatics remote sensing environmental modeling
+pde solvers
+performance
+petroleum exploration
+petroleum geology
+petrophysics
+phonetics and speech sciences; digital signal processing
+phylogenetics
+phylogenetics historical/comparative linguistics cultural evolution
+physical chemistry
+physical sciences engineering
+physics
+physics / computational physics math data visualization
+physics and software for instrumentation
+physics condensed matter optical spectroscopy
+physics condensed matter physics materials science imaging remote sensing
+physics high-performance computing algorithms gpu computing
+physics instrumentation optics
+physics machine learning
+physics materials science electron microscopy
+physics of complex systems
+physics optics
+physics quantum optics langevin dynamics
+physics scientific instrumentation science
+physics software engineering
+physics stochastic dynamics numerical simulations
+planning
+plasma physics
+plotting
+plotting in python
+pointclouds
+political science
+politics
+polymers
+prediction
+predictive analytics
+predictive modeling
+predictive models
+privacy
+probabilistic methods
+probabilistic programming
+probability
+product design
+products
+programming
+programming models parallel programming computer graphics visualization graphical user interfaces machine learning
+programs ci/cd & devops for computational science and engineering hpc applications
+project management
+protein docking
+psychology
+psychology biostatistics
+psychology cognitive neuroscience neuroimaging
+psychophysics
+public health
+public policy
+pupillometry
+pure math
+python distributed computing real time processing image processing graphs & graph databases nosql databases algorithms software development methodologies
+python libraries
+python toolkits
+python utilities
+quant finance
+quantitative finance
+quantum chemistry
+quantum chemistry gamess
+quantum cognition
+quantum computing
+quantum dynamics pde  accelerator numerics
+quantum mechanics
+quantum physics quantum chemistry optimal control
+r coding
+r work flow with other big data tools
+r-packages rstats muscle physiology biomechanics evolution phylogenetics phylogenetic comparative methods
+radar
+radiation measurements
+radiation transport
+radioactive waste management
+random forest
+rare variants
+reactor physics methods & applications
+real-time computing
+recommendation engines
+recommendation systems
+regression
+regression modeling
+regression models
+reinforcement learning
+reliability
+remote sensing
+remote sensing image processing system calibration
+renewable energy
+replication
+reproducibility
+reproducibility-related tools
+reproducible research
+reproducible research containers docker giscience gis geospatial data science geostatistics
+reproducible science
+research transparency
+rest apis
+rna-seq tumor drug target prediction
+robotics
+robotics control systems
+robotics mechanical engineering mathematics biomedical engineering machine learning computer vision heat transfer
+robotics optimization computer vision
+robotics simulation
+rock physics
+rough sets
+saas
+satellite images
+scattering
+science
+science; neuroscience
+scientific computing
+scientific data management
+scientific image understanding
+scientific programming math physics optics
+scientific software
+scientific visualization
+scientific workflows
+scientific writing tools
+scientometry [glad to consider anything and will reply quickly if not qualified]
+secure coding
+security
+sedimentology
+seismic wave propagation
+seismology
+seismology earth sciencies data visualization signal processing wave propagation
+seismology geophysics
+semiconductor physics
+sentiment analysis
+sequence analysis
+sequencing
+signal processing
+signal processing control
+signal processing image reconstruction electromagnetic modelling
+signal processing linear algebra statistics image processing
+signal processing machine learning biomechanics dynamics control systems data science electrophysiology electromyography gui visualization data acquisition embedded systems
+signal processing neuroscience blind source separation human brain imaging
+signal/image reconstruction
+simulation
+simulation of physical systems
+simulations
+smart cities
+social media
+social science
+social science data acquisition
+social sciences
+soft matter physics
+software defined radios and networks
+software design
+software development
+software development web dev machine learning
+software engg.
+software engineering
+software engineering agile software development empirical software engineering software process improvement
+software engineering computer science web/internet services/standards/protocols
+software engineering relational database management systems data structures web-based applications
+software engineering software testing
+software engineering web development machine learning distributed systems
+software refactoring
+software security
+software testing
+software testing geographic information systems data visualisation remote sensing
+software verification
+soil science
+solar energy solar cells semiconductors physics
+solar physics
+solar physics astronomy
+solid body dynamics
+solid-state chemistry
+solid-state physics
+solvers
+some ecology
+some machine learning
+space science
+spatial analysis
+spatial data
+spatial data infrastructures
+spatial epidemiology
+spatial features
+spatial modelling
+spatial or geo stuff
+spatial processing
+spatial statistics
+spatial statistics ecology environmental sciences
+spectral methods
+spectroscopy
+spectroscopy fitting
+speech
+sport science
+statistical analysis
+statistical mechanics
+statistical modeling
+statistical models
+statistical physics
+statistical power
+statistical process control
+statistics
+statistics bayesian analysis spatial statistics geographic information systems survival analysis computational statistics
+statistics biostatistics medicine epidemiology
+statistics computational biology bioinformatics
+statistics data science ecology
+statistics for psychological and social sciences data visualization data cleaning
+statistics machine learning ai neural networks
+statistics machine learning data science
+statistics survival analysis spatial statistics
+statistics/data science
+statistics/multiple regression
+stats
+stellar
+stellar modelling stellar oscillations
+stellar physics
+stellar populations
+stimulus presentation
+storage
+structural biology
+structural equation modeling
+supernovae
+supervised + unsupervised learning
+survey research
+surveys
+survival analysis
+symbolic algebra
+symbolic computations pattern matching program generation linear algebra
+symbolic regression
+synchrotrons
+system
+system integration
+systems
+systems biology computational biology
+systems engineering
+systems neuroscience eeg/meg  signal processing brain stimulation reinforcement learning
+systems software
+teaching
+technology
+technology in education
+tectonic geomorphology
+tectonics
+tensegrity structures multibody dynamics soft robotics control design flexible structures
+tensor algebra
+terrestrial/sub-terrestrial geophysics
+test automation
+testing
+text analysis
+text indexing and parsing
+text mining
+text mining natural language processing machine learning
+theorem provers
+theoretical chemistryphysical chemistry
+theoretical physics
+thermodynamics and kinetics
+time series
+time series analysis
+time-integration methods
+time-series
+time-series analysis
+time-series prediction
+tomography
+tools
+tools that facilitate data analysis
+topological data analysis
+topology
+transport studies
+ultrasound
+uncertainty quantification sensitivity analysis smart materials
+unstructured / unstructured meshing
+urban geography
+usability genomics user interface
+user experience
+user interfaces
+utilities
+validation
+variant calling
+vibrations
+video
+vision
+visualisation
+visualisations
+visualization
+viszalization
+viz
+volunteered geographic information
+voronoi tessellations
+water quality and quantity modeling
+water resources
+wcet analyses.
+web
+web and application data
+web and mobile apps
+web apis
+web applications
+web dev
+web development
+web platforms eeg+emg analysis labstraming layer interfacing with medical products study protocols
+web portals/data visualization infrastructure automation containerization bioinformatics
+web spiders
+web technology linked data information retrieval library and information science
+web-development
+webapps
+wireless sensor networks
+workflow
+workflow development
+workflow management systems
+workflow tools
+x-ray
+x-ray and neutron scattering techniques
+x-ray spectroscopy x-ray optics
+x-ray techniques
+x-ray/neutron diffraction
+xray science
+zoonoses

@@ -1,0 +1,71 @@
+JOSS graph
+
+graph model: joss-model.yaml (MDF)
+
+Initial load: reviewer list
+- raw data from https://docs.google.com/spreadsheets/d/1PAPRJ63yq9aPC1COLjaQp8mHmEq3rZUzwUYxTulyu78/edit#gid=856801822
+- normalized language strings from user-entered data (lang-filt.txt)
+- normalized topic strings from user-entered data (norm-topic-strings.txt + topic-filt.pl)
+- parsed with parse-jr.pl to build cypher stmts creating reviewers as persons, linking to language and topic
+  - initial graph linked persons to "review snapshots" that contain the review counts as given in the spreadsheet
+
+Next chunk: published papers - papers, submissions, authors, editors, reviewers
+- raw data from crossref.xml for each published paper in openjournals/joss-papers, and from github GraphQL API
+
+- slurp crossref.xml info by cloning joss-papers, parsing xml (papers.pl) and output intermediate JSON result (papers.json)
+
+- get editor, submitter, reviewer info by querying each review issue with GH API and parsing the review issue body (paper-authors.pl) and output intermediate result (pub-subm.json)
+
+- join crossref.xml and github issue info and write cypher statements creating paper, submission, assignment and author nodes and relationships (merge-authors.pl)
+
+Next chunk: create submission nodes (+editor, reviewers, authors assignments) for reviews and pre-reviews in process using GH API results, fill in prereview issues for published papers (in assoc submission nodes)
+
+- every openjournals/joss-reviews issue that is not already represented by papers
+  - a few will be pre-review issues for published papers
+  - get dates (date of first comment?)
+
+Next chunk: Identify preview issues from the review issue: whedon mentions the review issue in the prereview issue, this is noted in the review activity (prereviews.pl -> prerev.json)
+
+Next chunk: non-published submissions (n=390)
+
+- joss-reviews issues that are not associated with any published paper. (n=390)
+- some of these are not submissions (titles not prefixed with [REVIEW] or [PRE REVIEW]) (n=31)
+- [REVIEW] n=113
+- [PRE REVIEW] n=246
+- for some submission-related issues, the outcome is available in the labels ('paused', 'withdrawn', 'rejected')
+- remainder are in medias res
+
+1. get issn for [REVIEWS]
+2. map reviews to their prereviews (8 without prerevs/105 with)
+3. dispo of remainder of prereviews (141)? - in process, withdrawn, rejected...
+
+All pre reviews can be added to db as submissions - with author, reviewers, editors parsed from issue body.
+
+Update process
+
+- new prospective reviewers - from google spreadsheet
+  - determine diff from current db
+  - process language, topic
+- new submissions - from github joss-reviews
+  - determine new issues
+  - update lone prereviews - update disposition, assignments
+  - promote prereviews to reviews - update disposition, assignments
+  - determine newly published papers
+    - on timeline, whedon adds "accepted" label
+    - find the crossref.xml file via the joss doi
+
+- new published papers - from github joss-papers
+
+(Incremental update)
+At a given time, which issues need to be queried?
+   - issues that are not closed = submissions with disposition in ['review_pending','paused',
+     'under_review']
+     match (s:submission) where s.disposition in ['review_pending','paused','under_review'] 
+   - issues that are not present in the db - issues with number > max(issns)
+
+Flows:
+   - subm updates:
+     - update dispo
+   - subm creates:
+     - pre-review: parse issue
+     - review: find submission matching pre-review issue
