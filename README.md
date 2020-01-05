@@ -2,6 +2,8 @@
 
 Github scraping utilities for creating and maintaining a Neo4j graph database for [JOSS](https://joss.theoj.org) submission, review, and publication activities
 
+A [Docker container](#Docker) is available containing the database and updaters.
+
 # Database stats
 
 TBD
@@ -101,13 +103,16 @@ The following scripts are provided here to update a current Neo4j instance of JO
 
   * [update-ghquery.pl](./bin/update-ghquery.pl) - queries both the graph and the GitHub GraphQL (a.k.a. v4) endpoint to update submissions and publications
   
-  * [load-update.pl](./bin/load-upate.pl) - converts the JSON output of update-ghquery.pl into [Cypher](https://neo4j.com/docs/cypher-manual/current/) statements
+  * [load-update.pl](./bin/load-update.pl) - converts the JSON output of update-ghquery.pl into [Cypher](https://neo4j.com/docs/cypher-manual/current/) statements
+
+  * [minisrv.pl](./bin/minisrv.pl) - provides a control server to perform updates automatically
   
 These rely on the Perl modules in the [lib](./lib) directory. The machinery can be built locally by
 cloning the repo, cd'ing to the main directory, and executing:
 	
 	curl -L https://cpanmin.us | perl - App::cpanminus
 	cpanm Module::Build
+	cpanm -n Time::Zone # avoids a current bug in TimeDate tests
 	perl Build.PL
 	./Build
 	./Build installdeps --cpan_client cpanm
@@ -115,6 +120,22 @@ cloning the repo, cd'ing to the main directory, and executing:
 	
 Using the Docker container is easier.
 
+# Docker
+
+Run the following command to instantiate JOSS-graph in a container:
+
+	docker run docker run -d -e "GHCRED=<your_github_pass_or_token" \
+	  -p 7474:7474 -p 3001:3001 -p 7473:7473 -p 7687:7687 maj1/fortinbras:joss-graph
+
+Point a browser to https://localhost:7473 or http://localhost:7474 to explore the database.
+The neo4j instance is configured to be accessed without authentication.
+
+To update the database, perform a get request to http://localhost:3001/update. 
+
+Remove the `-p 3001:3001` option from the `docker run` command to hide the control server, and perform updates with the following command:
+
+	docker exec -it <container> curl http://localhost:3001/update
+	
 # License
 
 Perl (GNU GPLv2 / Artistic License)

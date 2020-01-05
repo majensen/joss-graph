@@ -1,5 +1,6 @@
 bin/load-update.pl
 bin/update-ghquery.pl
+bin/minisrv.pl
 Build.PL
 lib/JOSS.pm
 lib/JOSS/Crossref.pm

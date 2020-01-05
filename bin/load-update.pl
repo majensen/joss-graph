@@ -1,10 +1,11 @@
+#!/usr/bin/env perl
 # create cypher statements
 # reviews will have a strawman joss_doi
 # lone prereviews will have a null joss_doi
 
 use v5.10;
 use Try::Tiny;
-use Log::Log4perl::Tiny qw/:easy/;
+use Log::Log4perl::Tiny qw/:easy build_channels/;
 use JSON::ize;
 use Set::Scalar;
 use Neo4j::Cypher::Abstract qw/cypher ptn/;
@@ -12,7 +13,7 @@ use strict;
 use warnings;
 
 my $log = get_logger();
-
+$log->fh( build_channels( file_append => 'minisrv.log' ) );
 my $issues;
 my $fn = $ARGV[0];
 if ($fn) {
@@ -27,7 +28,12 @@ else {
   $_ = <>;
   parsej;
   $issues = J();
+  if (!scalar keys %$issues) {
+    $log->logcarp("Empty json received from STDIN");
+    exit 1;
+  }
   $log->logcroak("Problem loading input json from STDIN") unless $issues;
+  
 }
 
 my $iss = Set::Scalar->new( sort {$a<=>$b} keys %$issues );

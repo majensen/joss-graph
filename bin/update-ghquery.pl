@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 use v5.10;
 use lib 'lib';
 use utf8::all;
@@ -5,7 +6,7 @@ use Net::GitHub::V4;
 use Mojo::URL;
 use Mojo::UserAgent;
 use Try::Tiny;
-use Log::Log4perl::Tiny qw/:easy/;
+use Log::Log4perl::Tiny qw/:easy build_channels/;
 use JOSS::GHQueries;
 use JOSS::WhedonSlurp;
 use JOSS::Crossref;
@@ -18,14 +19,22 @@ sub CHUNK { 10 }
 pretty_json;
 
 my $log = get_logger();
+$log->fh( build_channels( file_append => 'minisrv.log' ) );
 my $nq = JOSS::NeoQueries->new();
 my $wd = JOSS::WhedonSlurp->new();
 my $ua = Mojo::UserAgent->new();
+my $pw = $ENV{GHCRED};
 
-open my $cred, "$ENV{HOME}/.git-credentials" or $log->logdie("Problem with .git-credentials: $!");
-my @cred = <$cred>;
+unless ($pw) {
+  if ( -e "$ENV{HOME}/.git-credentials" ) {
+    open my $cred, "$ENV{HOME}/.git-credentials" or $log->logdie("Problem with .git-credentials: $!");
+    my @cred = <$cred>;
+    $pw = Mojo::URL->new($cred[0])->password;
+  }
+}
+
 my $ng = Net::GitHub::V4->new(
-  access_token => Mojo::URL->new($cred[0])->password,
+  access_token => $pw,
  );
 my $dta;
 
@@ -39,7 +48,9 @@ unless ($last_issn) {
   $log->logcroak("Couldn't query repo for last issue");
 }
 unless ($last_issn > $since_issn) {
-  $log->logcroak("arg (latest issue in db) > last issue in repo");
+  $log->logcarp("arg (latest issue in db) >= last issue in repo");
+  say J({});
+  exit 1;
 }
 
 my $nr = $last_issn - $since_issn; # number to retrieve
