@@ -3,7 +3,7 @@ use Mojolicious::Lite;
 use IPC::Run qw/run timeout/;
 use Try::Tiny;
 
-sub TIMEOUT() { 60 }
+sub TIMEOUT() { 180 } # gh query can take a while
 
 my ($in, $out, $err);
 my @upd_cmd = ( ['update-ghquery.pl'],'|', ['load-update.pl'], '|', ['cypher-shell'] );

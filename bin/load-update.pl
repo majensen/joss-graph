@@ -61,7 +61,7 @@ for my $issn (sort {$a<=>$b} $m_revs->members) {
     joss_doi => sprintf( "10.21105/joss.%05d", $issn),
     review_issue => $subm->{url},
     prereview_issue => $url_stem.$subm->{prerev},
-    disposition => ($subm->{paper} ? 'published' : $subm->{disposition}),
+    disposition => ($subm->{paper} ? 'published' : ($subm->{disposition} eq 'submitted' ? 'under_review' : $subm->{disposition})),
   };
   create_stmts($subm, $iss_spec);
 }
