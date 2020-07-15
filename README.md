@@ -18,6 +18,8 @@ JOSS [Topic Editors](https://joss.theoj.org/about#topic_editors) often choose re
 
 The graph model is described in [joss-model.yaml](./joss-model.yaml). The format complies with the Model Description File format in [Bento](https://github.com/CBIIT/bento-mdf).
 
+![JOSS graph diagram](./joss-graph.svg)
+
 There are four main nodes:
 
  * person
