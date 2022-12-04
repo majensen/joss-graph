@@ -11,7 +11,7 @@ use strict;
 use warnings;
 
 
-my $paper_repo = "./joss-papers";
+my $paper_repo = $ARGV[0] // "../../joss-papers";
 my %papers;
 my @errored;
 pretty_json;

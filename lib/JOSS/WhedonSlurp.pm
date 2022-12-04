@@ -15,10 +15,17 @@ sub new {
 
 sub parse_issue_body {
   my $self = shift;
-  my ($body) = (@_);
+  my ($body, $issue) = (@_);
   my $ret;
-  $log->logcarp("parse_issue_body: arg doesn't look like a whedon-created issue description")
-    unless ($body =~ /Submitting author/);
+
+  if ($body =~ /STOP STOP/) {
+    $log->logcarp("parse_issue_body: Issue $issue - somebody made a boo boo.");
+    return;
+  }
+  if ($body !~ /Submitting author/) {
+    $log->logcarp("parse_issue_body: Issue $issue - arg doesn't look like a whedon-created issue description");
+    return;
+  }
   for (split /\n/,$body) {
     /Submitting author/ && do {
       /\@(\S+)/;
@@ -46,7 +53,7 @@ sub parse_issue_body {
       next;
     };
     /Reviewer/ && do {
-      my @rev = /\@(\S+)/g;
+      my @rev = /\@(\S+),?/g;
       @rev && push(@{$ret->{reviewers}}, @rev);
       next;
     };

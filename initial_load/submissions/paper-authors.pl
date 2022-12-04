@@ -24,7 +24,7 @@ my $ng = Net::GitHub::V4->new(
 my $dta;
 
 pretty_json;
-my $papers = J('papers.json');
+my $papers = J('papers-20200718.json');
 
 my %submissions;
 
@@ -32,6 +32,7 @@ for my $issn (sort { $a <=> $b } keys %$papers) {
   $DB::single =1;
   try {
     $dta = $ng->query( make_qry('issue_body_by_number', { number => $issn } ) );
+    die $dta->{message} if $dta->{message};
   } catch {
     say "Query on $issn failed: $_";
     next;

@@ -18,20 +18,32 @@ Nodes:
       - ['name']
     Props:
       - name
+  # model topic - an aggregator of terms
+  mtopic:
+    Props:
+      - name
+  # a stemmed, normalized english word
+  term:
+    Props:
+      - value
   submission: # not 'paper' - paper is a published submission
     UniqueKeys:
-      - ['doi']
+      - ['joss_doi']
     Props:
       - title
       - joss_doi
       - repository
+      - pr_issn
+      - r_issn
       - prerev_issue
       - review_issue
       - disposition
   paper:
     UniqueKeys:
       - ['archive_doi']
+      - ['joss_doi']
     Props:
+      - issn
       - title
       - joss_doi
       - archive_doi
@@ -150,6 +162,32 @@ Relationships:
     Ends:
       - Src: event
         Dst: person
+  has_topic:
+    Mul: many_to_many
+    Props:
+      - gamma
+    Ends:
+      - Src: paper
+        Dst: mtopic
+      - Src: submission
+        Dst: mtopic
+  has_term:
+    Mul: many_to_many
+    Props:
+      - beta
+    Ends:
+      - Src: mtopic
+        Dst: term
+  reports_term:
+    Mul: many_to_many
+    Ends:
+      - Src: person
+        Dst: term
+  has_portfolio_topic:
+    Mul: many_to_many
+    Ends:
+      - Src: person
+        Dst: mtopic
 PropDefinitions:
   real_name:
     Desc: person real name
@@ -200,13 +238,22 @@ PropDefinitions:
     Req: true
     Type: url
   prereview_issue:
-    Desc: joss_reviews issue number
+    Desc: joss_reviews prereview issue url
     Req: true
-    Type: integer
+    Type: url
   review_issue:
-    Desc: joss_reviews issue number
+    Desc: joss_reviews review issue url
     Nul: true
+    Type: url
+  issn:
+    Desc: GitHub issue number
     Type: integer
+  gamma:
+    Desc: document - mtopic weight
+    Type: number
+  beta:
+    Desc: mtopic - term weight
+    Type: number
   submitted_date:
     Req: true
     Type: datetime
@@ -251,4 +298,4 @@ PropDefinitions:
   issue:
     Desc: journal issue number
     Type: integer
-    
+  

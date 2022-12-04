@@ -12,8 +12,12 @@ use JOSS::WhedonSlurp;
 use JOSS::Crossref;
 use JOSS::NeoQueries;
 use JSON::ize;
+use IPC::Run qw/run timeout/;
+use File::Path qw/rmtree/;
 use strict;
 use warnings;
+
+$ENV{NEODSN}='dbi:Neo4p:db=http://localhost:7474';
 
 sub CHUNK { 10 }
 pretty_json;
@@ -24,6 +28,7 @@ my $nq = JOSS::NeoQueries->new();
 my $wd = JOSS::WhedonSlurp->new();
 my $ua = Mojo::UserAgent->new();
 my $pw = $ENV{GHCRED};
+my ($in, $out, $err);
 
 unless ($pw) {
   if ( -e "$ENV{HOME}/.git-credentials" ) {
@@ -59,13 +64,30 @@ my $issues = get_last_issues($nr);
 
 # issues in db that need checking:
 
+my @no_topics;
+
 for my $q ($nq->available_queries) {
   for my $issn ($nq->$q) {
     my $iss = get_issue_by_num($issn);
     if ($iss) {
       $issues->{$issn} = $iss;
+      push @no_topics, $issn if ($q =~ /no_topics/);
     }
   }
+}
+
+if ($ENV{DO_TOPIC_ANALYSIS}) { # short circuit topic analysis
+# do topic analysis on the pending review mss
+for (@no_topics) {
+  my $ent = $issues->{$_};
+  if (my @gamma = model_subm_topics($ent)) {
+    my $i = 1;
+    for my $g (@gamma) {
+      $ent->{topics}{"Topic $i"} = $g;
+      $i++;
+    }
+  }
+}
 }
 
 for my $issn (sort {$a <=> $b} keys %$issues) {
@@ -117,7 +139,8 @@ sub get_last_issues {
       $ent->{number} = $item->{number};
       $ent->{title} = $item->{title};
       $ent->{url} = $item->{url};
-      $ent->{info} = $wd->parse_issue_body( $item->{body} );
+      $ent->{info} = $wd->parse_issue_body( $item->{body}, $item->{number} );
+      next unless ($ent->{info});
       for my $l (@{$item->{labels}{nodes}}) {
 	push @{$ent->{labels}}, $l->{name};
       }
@@ -170,12 +193,11 @@ sub find_prerev_for_rev {
     $dta = $ng->query( make_qry('prereview_issue_by_review_issue', { number => $issn } ) );
   } catch {
     $log->logcarp("prereview_issue_by_review_issue: query on $issn failed: $_");
-    next;
   };
   my $nodes = $dta->{data}{organization}{repository}{issue}{timelineItems}{edges};
   for (@$nodes) {
     my $src = $_->{node}{source};
-    if ($src->{author}{login} eq 'whedon' and $src->{title} =~ /^\s*\[PRE\s*REVIEW\]/) {
+    if ($src->{author}{login} =~ /whedon|editorialbot/ and $src->{title} =~ /^\s*\[PRE\s*REVIEW\]/) {
       return 0+$src->{number};
     }
   }
@@ -192,7 +214,7 @@ sub find_xml_for_accepted {
     next;
   };
   my @cmts = @{$dta->{data}{organization}{repository}{issue}{comments}{nodes}};
-  my @whd = grep { $_->{author}{login} eq 'whedon' and $_->{body} =~ /NOT A DRILL/ } @cmts;
+  my @whd = grep { $_->{author}{login} =~ /whedon|editorialbot/ and $_->{body} =~ /NOT A DRILL/ } @cmts;
   if (@whd) {
     my $info;
     my $txt = $whd[0]{body};
@@ -248,3 +270,42 @@ sub dispo {
   return $dispo;
 }
 
+sub model_subm_topics {
+  my ($issue) = @_;
+  print STDERR "Pull $$issue{info}{repo}...";
+  my $pull_repo = [split / /, "git clone $$issue{info}{repo} test"];
+  my $find_paper = [split / /,"find test -name paper.md"];
+  # attempt to pull repo
+  unless( run $pull_repo,\$in,\$out,\$err ) {
+    $log->logcarp("Could not pull repo '$$issue{info}{repo}':\n$err");
+    print STDERR "fail\n";
+    return;
+  }
+  $in=$out=$err='';
+  unless( run $find_paper, \$in, \$out, \$err ) {
+    $log->logcarp("paper.md not found in '$$issue{info}{repo}' master");
+    rmtree("./test");
+    print STDERR "fail\n";
+    return;
+  }
+  my ($loc) = split /\n/,$out;
+  unless ($loc and $loc =~ /\btest\b/) {
+    $log->logcarp("find returned '$loc'");
+    rmtree("./test");
+    print STDERR "fail\n";
+    return;
+  }
+  run ["cp",$loc, "./paper.md"];
+  $in=$out=$err="";
+  unless (run [split / /,"./topicize.r paper.md"], \$in, \$out,\$err) {
+    $log->logcarp("error in topicize.r:\n$err");
+    rmtree("./test");
+    print STDERR "fail\n";
+    return;
+  }
+  
+  rmtree("./test");
+  my @ret = split /\n/,$out;
+  print STDERR "SUCCESS\n";  
+  return @ret;
+}

@@ -12,6 +12,7 @@ use Neo4j::Cypher::Abstract qw/cypher ptn/;
 use strict;
 use warnings;
 
+my $NORM_TO = 0.95;
 my $log = get_logger();
 $log->fh( build_channels( file_append => 'minisrv.log' ) );
 my $issues;
@@ -146,7 +147,16 @@ sub create_stmts {
   push @cypher, cypher->merge(ptn->N('s:submission', $mrg_spec))
     ->on_create->set(set_arg('s', $s_spec))
     ->on_match->set(set_arg('s', $upd_spec));
-
+  if ($subm->{topics}) {
+    my $topics = renorm($subm->{topics});
+    for my $k (keys %$topics) {
+      my $q = cypher->match(ptn->C( ptn->N('s:submission', $mrg_spec), ptn->N('t:mtopic', {name => $k})))
+	->merge(ptn->N('s')->R('r:has_topic>')->N('t'))
+	->set(set_arg('r', { gamma => 0+$topics->{$k} }));
+      push @cypher, $q;
+    }
+  }
+  
   #person
   # editor
   if ($ed_spec->{handle}) {
@@ -232,6 +242,23 @@ sub set_arg {
   my $ret = {};
   for (keys %$hash) {
     $ret->{"$nd\.$_"} = $hash->{$_} if defined $hash->{$_};
+  }
+  return $ret;
+}
+
+sub renorm {
+  my ($thash) = @_;
+  my @desckeys = sort { $thash->{$b} <=> $thash->{$a} } keys %$thash;
+  my $cum = 0;
+  my @normkeys;
+  for my $k (@desckeys) {
+    $cum+=$thash->{$k};
+    push @normkeys, $k;
+    last if $cum >= $NORM_TO;
+  }
+  my $ret;
+  for (@normkeys) {
+    $ret->{$_} = $thash->{$_}/$cum;
   }
   return $ret;
 }

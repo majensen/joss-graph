@@ -56,7 +56,6 @@ QRY
       }
     }
   }
-
 QRY
   issue_by_number => <<QRY, # number
   { 
@@ -78,7 +77,6 @@ QRY
     }
   }
 QRY
-
   issue_body_by_number => <<QRY, # number
   { 
     organization(login:"openjournals") {
@@ -99,7 +97,7 @@ QRY
   }
 QRY
   prereview_issue_by_review_issue => <<QRY, # number - review issue# 
-{
+  {
   organization(login: "openjournals") {
     repository(name: "joss-reviews") {
       issue(number: [%- number -%]) {
@@ -126,7 +124,6 @@ QRY
   }
 }
 QRY
-  
   issues_since_chunk => <<QRY, # chunk: num recs, cursor: stringified cursor, date: issues since 8601 datetime 
   {
    organization(login: "openjournals") {
@@ -219,6 +216,48 @@ QRY
       }
     }
   }
+}
+QRY
+  master_tree => <<QRY, # user || org - login name, repo - repo name
+  {
+    [% IF user %] user [% ELSE %] organization [% END %] (login: "[% IF user %][%- user -%][% ELSE %][%- org -%][% END %]") {
+      repository(name: "[%- repo -%]") {
+        object(expression: "master^{tree}") {
+         oid
+        }
+      }
+   }
+ }
+
+QRY
+  object_tree_entries => <<QRY, # user || org - login name, repo - repo name, oid - object id
+  {
+    [% IF user %]user[% ELSE %]organization[% END %](login: "[% IF user %][%- user -%][% ELSE %][%- org -%][% END %]") {
+      repository(name: "[%- repo -%]") {
+        object(oid: "[%- oid -%]") {
+        ... on Tree {
+          entries {
+            name
+            type
+            oid
+          }
+        }
+      }
+   }
+ }
+}
+QRY
+  object_blob_text_content => <<QRY, # user || org - login name, repo - repo name, oid - object id
+  {
+    [% IF user %]user[% ELSE %]organization[% END %](login: "[% IF user %][%- user -%][% ELSE %][%- org -%][% END %]") {
+      repository(name: "[%- repo -%]") {
+        object(oid: "[%- oid -%]") {
+        ... on Blob {
+          text
+        }
+      }
+   }
+ }
 }
 QRY
  );

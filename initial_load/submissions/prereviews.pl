@@ -12,7 +12,8 @@ use strict;
 use warnings;
 
 my $tt = Template::Tiny->new();
-my $papers = J('papers.json');
+my $papers_file = $ARGV[0] // 'papers-20200718.json';
+my $papers = J($papers_file);
   
 open my $cred, "$ENV{HOME}/.git-credentials" or die $!;
 my @cred = <$cred>;
