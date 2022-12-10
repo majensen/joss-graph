@@ -81,7 +81,7 @@ sub parse_issue_body {
     };
     /reviewer questions|status/i && last;
   }
-  $ret;  
+  $iss->{info} = $ret;
 }
 
 1;

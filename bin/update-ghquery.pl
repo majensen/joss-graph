@@ -14,6 +14,7 @@ use JOSS::NeoQueries;
 use JSON::ize;
 use IPC::Run qw/run timeout/;
 use File::Path qw/rmtree/;
+use File::Temp qw/tempfile/;
 use strict;
 use warnings;
 
@@ -71,23 +72,18 @@ for my $q ($nq->available_queries) {
     my $iss = get_issue_by_num($issn);
     if ($iss) {
       $issues->{$issn} = $iss;
-      push @no_topics, $issn if ($q =~ /no_topics/);
+      if ($ENV{DO_TOPIC_ANALYSIS}) { # short circuit topic analysis
+	# do topic analysis on the pending review mss
+	if (my @gamma = model_subm_topics($iss)) {
+	  my $i = 1;
+	  for my $g (@gamma) {
+	    $iss->{topics}{"Topic $i"} = $g;
+	    $i++;
+	  }
+	}
+      }
     }
   }
-}
-
-if ($ENV{DO_TOPIC_ANALYSIS}) { # short circuit topic analysis
-# do topic analysis on the pending review mss
-for (@no_topics) {
-  my $ent = $issues->{$_};
-  if (my @gamma = model_subm_topics($ent)) {
-    my $i = 1;
-    for my $g (@gamma) {
-      $ent->{topics}{"Topic $i"} = $g;
-      $i++;
-    }
-  }
-}
 }
 
 for my $issn (sort {$a <=> $b} keys %$issues) {
@@ -134,19 +130,8 @@ sub get_last_issues {
       $log->logcarp("last_n_issues query failed: $_");
       last;
     };
-    for my $item ( @{$dta->{data}{organization}{repository}{issues}{nodes}} ) {
-      my $ent;
-      $ent->{number} = $item->{number};
-      $ent->{title} = $item->{title};
-      $ent->{url} = $item->{url};
-      $ent->{info} = $wd->parse_issue_body( $item->{body}, $item->{number} );
-      next unless ($ent->{info});
-      for my $l (@{$item->{labels}{nodes}}) {
-	push @{$ent->{labels}}, $l->{name};
-      }
-      $ent->{disposition} = dispo([map {$_->{name}} @{$item->{labels}{nodes}}],$item->{state});
-      
-      $issues{$ent->{number}} = $ent;
+    for my $issue ( @{$dta->{data}{organization}{repository}{issues}{nodes}} ) {
+      $issues{$issue->{number}} = parse_issue($issue);
     }
     $cursor = $dta->{data}{organization}{repository}{issues}{pageInfo}{startCursor};
     $nr -= $c;
@@ -163,17 +148,21 @@ sub get_issue_by_num {
     $log->logcarp("issue_by_number query failed: $_");
     return;
   };
-  my $item = $dta->{data}{organization}{repository}{issue};
-  my $ent;
-  $ent->{number} = $item->{number};
-  $ent->{title} = $item->{title};
-  $ent->{url} = $item->{url};
-  $ent->{info} = $wd->parse_issue_body( $item->{body} );
-  for my $l (@{$item->{labels}{nodes}}) {
-    push @{$ent->{labels}}, $l->{name};
+  my $issue = $dta->{data}{organization}{repository}{issue};
+  return parse_issue($issue);
+}
+
+sub parse_issue {
+  my ($issue) = @_;
+  $log->info("Parsing issue $issue->{number}");
+  $wd->parse_issue_body( $issue );
+  my @lbls;
+  for my $l (@{$issue->{labels}{nodes}}) {
+    push @lbls, $l->{name};
   }
-  $ent->{disposition} = dispo([map {$_->{name}} @{$item->{labels}{nodes}}],$item->{state});
-  return $ent;
+  $issue->{label_names} = \@lbls;
+  $issue->{disposition} = dispo([map {$_->{name}} @{$issue->{labels}{nodes}}],$issue->{state});
+  return $issue;
 }
 
 sub get_last_issue_num {
@@ -270,10 +259,13 @@ sub dispo {
   return $dispo;
 }
 
-sub model_subm_topics {
+sub get_paper_text {
   my ($issue) = @_;
-  print STDERR "Pull $$issue{info}{repo}...";
-  my $pull_repo = [split / /, "git clone $$issue{info}{repo} test"];
+  $log->info("Sparse, shallow pull $$issue{info}{repo}");
+  $DB::single=1;
+  my $branch = $issue->{info}{branch} ? "--branch $$issue{info}{branch}" : "";
+  my $pull_repo = [split / +/, "git clone --sparse --depth 1 $branch $$issue{info}{repo} test"];
+  my $add_paper_dir = [split / +/, "git sparse-checkout add paper"];
   my $find_paper = [split / /,"find test -name paper.md"];
   # attempt to pull repo
   unless( run $pull_repo,\$in,\$out,\$err ) {
@@ -281,13 +273,15 @@ sub model_subm_topics {
     print STDERR "fail\n";
     return;
   }
+  run( $add_paper_dir, init => sub { chdir "test" or die $! } );
   $in=$out=$err='';
   unless( run $find_paper, \$in, \$out, \$err ) {
-    $log->logcarp("paper.md not found in '$$issue{info}{repo}' master");
+    $log->logcarp("paper.md not found in '$$issue{info}{repo}' main branch");
     rmtree("./test");
     print STDERR "fail\n";
     return;
   }
+  
   my ($loc) = split /\n/,$out;
   unless ($loc and $loc =~ /\btest\b/) {
     $log->logcarp("find returned '$loc'");
@@ -295,17 +289,30 @@ sub model_subm_topics {
     print STDERR "fail\n";
     return;
   }
-  run ["cp",$loc, "./paper.md"];
+  undef $/;
+  open my $ppr, $loc;
+  $issue->{paper_text} = <$ppr>;
+  rmtree("./test");
+  return 1;
+}
+
+sub model_subm_topics {
+  my ($issue) = @_;
+  unless ($issue->{paper_text}) {
+    $log->logcarp("No paper text for issue $issue->{number}");
+    return;
+  }
+  $log->info("Model paper topics for issue $issue->{number}");
+  my ($f, $fh) = tempfile();
+  print $fh, $issue->{paper_text};
+  $fh->flush;
   $in=$out=$err="";
-  unless (run [split / /,"./topicize.r paper.md"], \$in, \$out,\$err) {
+  unless (run [split / /,"./topicize.r $f"], \$in, \$out,\$err) {
     $log->logcarp("error in topicize.r:\n$err");
-    rmtree("./test");
     print STDERR "fail\n";
     return;
   }
-  
-  rmtree("./test");
   my @ret = split /\n/,$out;
-  print STDERR "SUCCESS\n";  
+  $log->info("Paper topics for issue $issue->{number} successfully modeled");
   return @ret;
 }
