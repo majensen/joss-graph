@@ -15,49 +15,71 @@ sub new {
 
 sub parse_issue_body {
   my $self = shift;
-  my ($body, $issue) = (@_);
+  my ($iss) = (@_);
   my $ret;
-
+  my $body = $iss->{body};
+  my $num = $iss->{number};
   if ($body =~ /STOP STOP/) {
-    $log->logcarp("parse_issue_body: Issue $issue - somebody made a boo boo.");
+    $log->logcarp("parse_issue_body: Issue $num - somebody made a boo boo.");
     return;
   }
   if ($body !~ /Submitting author/) {
-    $log->logcarp("parse_issue_body: Issue $issue - arg doesn't look like a whedon-created issue description");
+    $log->logcarp("parse_issue_body: Issue $num - arg doesn't look like a whedon-created issue description");
     return;
   }
   for (split /\n/,$body) {
     /Submitting author/ && do {
-      /\@(\S+)/;
+      /\@(\w+)/;
       $1 && ($ret->{author}{handle} = $1);
       /href="([^"]+)"/;
       $1 && ($ret->{author}{orcid} = $1);
-      m|>(.*)</a>|;
+      m|<a[^>]+>(.*)</a>|;
       $1 && ($ret->{author}{name} = $1);
       next;
     };
     /Repository/ && do {
+      /repository-->([^<]+)<!--/;
+      $1 && ($ret->{repo} = $1);
+      next if $ret->{repo};
       /href="([^"]+)"/;
       $1 && ($ret->{repo} = $1);
       next;
     };
     /Version/ && do {
-      next if $ret->{version};
+      s/<!--(?:end-)?version-->//g;
       /\*\*Version:\*\*\s+(\S+)/;
       $1 && ($ret->{version} = $1);
       next;
     };
     /Editor/ && do {
-      /\@(\S+)/;
+      /\@(\w+)/;
       $1 && ($ret->{editor} = $1);
       next;
     };
     /Reviewer/ && do {
-      my @rev = /\@(\S+),?/g;
+      my @rev;
+      s/<!--(?:end-)?reviewers-list-->//g;
+      /\*\*Reviewers:\*\*\s*(.*)/;
+      $1 && do {
+	$_ = $1;
+	s/\s*$//;
+	y/@//d;
+	@rev = split(/,\s*/)
+      };
       @rev && push(@{$ret->{reviewers}}, @rev);
       next;
     };
-    /reviewer questions/i && last;
+    /Branch/ && do {
+      /branch-->([^<]+)<!--/;
+      $1 && ($ret->{branch} = $1);
+      next;
+    };
+    /Archive/ && do {
+      /archive-->([^<]+)<!--/;
+      $1 && ($ret->{archive} = $1);
+      next;
+    };
+    /reviewer questions|status/i && last;
   }
   $ret;  
 }
