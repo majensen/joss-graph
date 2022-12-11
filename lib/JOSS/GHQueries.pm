@@ -66,6 +66,8 @@ QRY
           title
           url
           state
+          createdAt
+          closedAt
           labels(first:20) {
             nodes {
               name
