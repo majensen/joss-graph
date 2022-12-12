@@ -33,10 +33,11 @@ unless ($last_issn > $since_issn) {
 
 my $nr = $last_issn - $since_issn; # number to retrieve
 
+$log->info("Get the $nr latest issues");
 my $issues = get_last_issues($nr);
 
 # issues in db that need checking:
-
+$log->info("Check old issues for updates");
 for my $q ($nq->available_queries) {
   for my $issn ($nq->$q) {
     my $iss = get_issue_by_num($issn);
@@ -52,31 +53,6 @@ for my $q ($nq->available_queries) {
 	    $i++;
 	  }
 	}
-      }
-    }
-  }
-}
-
-for my $issn (sort {$a <=> $b} keys %$issues) {
-  my $ent = $issues->{$issn};
-  if ($ent->{title} =~ /^\s*\[REVIEW/) {
-    my $prn = find_prerev_for_rev($issn);
-    $ent->{prerev} = $prn if $prn;
-    if ($ent->{disposition} eq 'accepted') { # get publication info
-      my $xrf = find_xml_for_accepted($issn);
-      if ($xrf) {
-	$ent->{disposition} = 'published';
-	my $p = {};
-	$$p{authors} = $xrf->get_authors;
-	$$p{published_date} = $xrf->get_pubdate;
-	$$p{title} = $xrf->get_title;
-	$$p{review_issue} = $xrf->get_review_issue;
-	@{$p}{qw/volume issue/} = @{$xrf->get_vol_issue}{qw/volume issue/};
-	@{$p}{qw/joss_doi archive_doi url/} = @{$xrf->get_dois}{qw/jdoi adoi url/};
-	$ent->{paper} = $p;
-      }
-      else {
-	$log->info("Issue $issn - accepted but crossref.xml not found");
       }
     }
   }

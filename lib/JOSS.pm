@@ -159,35 +159,40 @@ sub get_paper_text {
   $log->info("Sparse, shallow pull $$issue{info}{repo}");
   $DB::single=1;
   my $branch = $issue->{info}{branch} ? "--branch $$issue{info}{branch}" : "";
-  my $pull_repo = [split / +/, "git clone --sparse --depth 1 $branch $$issue{info}{repo} test"];
+  my $pull_repo = [split / +/, "git clone --sparse --depth 1 $branch $$issue{info}{repo} josstest"];
   my $add_paper_dir = [split / +/, "git sparse-checkout add paper"];
-  my $find_paper = [split / /,"find test -name paper.md"];
+  my $find_paper = [split / /,"find josstest -name paper.md"];
   # attempt to pull repo
+  $in = "\n\n"; # get past logins
   unless( run $pull_repo,\$in,\$out,\$err ) {
     $log->logcarp("Could not pull repo '$$issue{info}{repo}':\n$err");
     print STDERR "fail\n";
     return;
   }
-  run( $add_paper_dir, init => sub { chdir "test" or $log->logcarp($!); } );
+  run( $add_paper_dir, init => sub { chdir "josstest" or $log->logcarp($!); } );
   $in=$out=$err='';
   unless( run $find_paper, \$in, \$out, \$err ) {
     $log->logcarp("paper.md not found in '$$issue{info}{repo}' main branch");
-    rmtree("./test");
+    rmtree("./josstest");
     print STDERR "fail\n";
     return;
   }
   
   my ($loc) = split /\n/,$out;
-  unless ($loc and $loc =~ /\btest\b/) {
+  unless ($loc and $loc =~ /\bjosstest\b/) {
     $log->logcarp("find returned '$loc'");
-    rmtree("./test");
+    rmtree("./josstest");
     print STDERR "fail\n";
     return;
   }
   undef $/;
   open my ($ppr), $loc;
-  $issue->{paper_text} = <$ppr>;
-  rmtree("./test");
+  try {
+    $issue->{paper_text} = <$ppr>;
+  } catch {
+    $log->logcarp("Failed to read paper.md on $issue->{info}{repo}: $_");
+  };
+  rmtree("./josstest");
   return 1;
 }
 
@@ -224,6 +229,28 @@ sub parse_issue {
   }
   $issue->{label_names} = \@lbls;
   $issue->{disposition} = dispo([map {$_->{name}} @{$issue->{labels}{nodes}}],$issue->{state});
+  if ($issue->{title} =~ /^\s*\[REVIEW/) {
+    my $issn = $issue->{number};
+    my $prn = find_prerev_for_rev($issn);
+    $issue->{prerev} = $prn if $prn;
+    if ($issue->{disposition} eq 'accepted') { # get publication info
+      my $xrf = find_xml_for_accepted($issn);
+      if ($xrf) {
+	$issue->{disposition} = 'published';
+	my $p = {};
+	$$p{authors} = $xrf->get_authors;
+	$$p{published_date} = $xrf->get_pubdate;
+	$$p{title} = $xrf->get_title;
+	$$p{review_issue} = $xrf->get_review_issue;
+	@{$p}{qw/volume issue/} = @{$xrf->get_vol_issue}{qw/volume issue/};
+	@{$p}{qw/joss_doi archive_doi url/} = @{$xrf->get_dois}{qw/jdoi adoi url/};
+	$issue->{paper} = $p;
+      }
+      else {
+	$log->info("Issue $issn - accepted but crossref.xml not found");
+      }
+    }
+  }
   return $issue;
 }
 
