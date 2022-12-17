@@ -38,7 +38,7 @@ else {
 }
 
 my $iss = Set::Scalar->new( sort {$a<=>$b} keys %$issues );
-my $revs = Set::Scalar->new( grep { $issues->{$_}{title} and $issues->{$_}{title} =~ /^\[REVIEW\]/ } $iss->members );
+ my $revs = Set::Scalar->new( grep { $issues->{$_}{title} and $issues->{$_}{title} =~ /^\[REVIEW\]/ } $iss->members );
 my $m_revs = Set::Scalar->new( grep { $issues->{$_}{prerev} } $revs->members );
 my $m_prerevs = Set::Scalar->new( map { $issues->{$_}{prerev} } $m_revs->members );
 my $prerevs = Set::Scalar->new( grep { $issues->{$_}{title} and $issues->{$_}{title} =~ /^\[PRE.REVIEW\]/ } $iss->members );
@@ -50,6 +50,7 @@ my $lone_revs = $revs->difference($m_revs);
 my @cypher;
 
 # matched rev/prerevs
+my $i=0;
 for my $issn (sort {$a<=>$b} $m_revs->members) {
   my $subm = $issues->{$issn};
   my $url_stem = $subm->{url};
@@ -61,10 +62,13 @@ for my $issn (sort {$a<=>$b} $m_revs->members) {
   my $iss_spec = {
     joss_doi => sprintf( "10.21105/joss.%05d", $issn),
     review_issue => $subm->{url},
+    review_issue_number => $issn,
     prereview_issue => $url_stem.$subm->{prerev},
+    prereview_issue_number => $subm->{prerev},
     disposition => ($subm->{paper} ? 'published' : ($subm->{disposition} eq 'submitted' ? 'under_review' : $subm->{disposition})),
   };
   create_stmts($subm, $iss_spec);
+  $log->info("Processed $i issues") unless ($i++) % 100;
 }
 
 for my $issn (sort {$a<=>$b} $lone_revs->members) {
@@ -76,6 +80,7 @@ for my $issn (sort {$a<=>$b} $lone_revs->members) {
   my $iss_spec = {
     joss_doi => sprintf( "10.21105/joss.%05d", $issn),
     review_issue => $subm->{url},
+    review_issue_number => $issn,
     disposition => ($subm->{disposition} eq 'submitted' ? 'under_review' : $subm->{disposition}),
   };
   create_stmts($subm, $iss_spec);
@@ -89,6 +94,7 @@ for my $issn (sort {$a<=>$b} $lone_prerevs->members) {
   }
   my $iss_spec = {
     prereview_issue => $subm->{url},
+    prereview_issue_number => $issn,
     disposition => ($subm->{disposition} eq 'submitted' ? 'review_pending' : $subm->{disposition}),
   };
   create_stmts($subm, $iss_spec);
@@ -109,8 +115,10 @@ sub create_stmts {
   # submitter spec
   my $sa_spec = {
     handle => $subm->{info}{author}{handle},
-    real_name => $subm->{info}{author}{name},
-    $subm->{info}{author}{orcid} ? (orcid => $subm->{info}{author}{orcid}) : (),
+    $subm->{info}{author}{name} ?
+      (real_name => $subm->{info}{author}{name}) : (),
+    $subm->{info}{author}{orcid} ?
+      (orcid => $subm->{info}{author}{orcid}) : (),
   };
   # editor spec
   my $ed_spec = { handle => $subm->{info}{editor} };
