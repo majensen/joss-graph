@@ -20,12 +20,21 @@ Nodes:
       - name
   # model topic - an aggregator of terms
   mtopic:
+    Desc: A LDA-modeled topic
     Props:
       - name
   # a stemmed, normalized english word
   term:
     Props:
       - value
+  issue:
+    Desc: A GitHub issue
+    Props:
+      - body
+      - url
+      - created_date
+      - closed_date
+      - number
   submission: # not 'paper' - paper is a published submission
     UniqueKeys:
       - ['joss_doi']
@@ -107,6 +116,16 @@ Relationships:
     Ends:
       - Src: assignment
         Dst: submission
+  has_prereview_issue:
+    Mul: one_to_one
+    Ends:
+      - Src: submission
+        Dst: issue
+  has_review_issue:
+    Mul: one_to_one
+    Ends:
+      - Src: submission
+        Dst: issue
   has_preferred_language:
     Mul: many_to_many
     Ends:
@@ -227,7 +246,7 @@ PropDefinitions:
     Desc: JOSS DOI
     Nul: true
     Type:
-      pattern: ^.+$ # better one
+      pattern: "^.+$" # better one
   archive_doi:
     Desc: archive (like Zenodo)DOI
     Nul: true
@@ -298,4 +317,13 @@ PropDefinitions:
   issue:
     Desc: journal issue number
     Type: integer
-  
+  number:
+    Desc: Github issue number
+    Type: integer
+  created_date:
+    Desc: Github issue create date
+    Type: datetime
+  closed_date:
+    Desc: Github issue close date
+    Type: datetime
+    

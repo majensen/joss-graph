@@ -52,52 +52,60 @@ my @cypher;
 # matched rev/prerevs
 my $i=0;
 for my $issn (sort {$a<=>$b} $m_revs->members) {
-  my $subm = $issues->{$issn};
-  my $url_stem = $subm->{url};
+  my $issue = $issues->{$issn};
+  my $url_stem = $issue->{url};
   $url_stem =~ s/[0-9]+$//;
-  unless ($subm) {
+  unless ($issue) {
     $log->logcarp("No review with issue number $issn");
     next;
   }
-  my $iss_spec = {
+  $issue->{title} =~ s/\[[^]]\]:\s*//;
+  my $subm_spec = {
     joss_doi => sprintf( "10.21105/joss.%05d", $issn),
-    review_issue => $subm->{url},
+    repository => $issue->{info}{repo},
+    title => $issue->{title},
+#    review_issue => $issue->{url},
     review_issue_number => $issn,
-    prereview_issue => $url_stem.$subm->{prerev},
-    prereview_issue_number => $subm->{prerev},
-    disposition => ($subm->{paper} ? 'published' : ($subm->{disposition} eq 'submitted' ? 'under_review' : $subm->{disposition})),
+#    prereview_issue => $url_stem.$issue->{prerev},
+    prereview_issue_number => $issue->{prerev},
+    disposition => ($issue->{paper} ? 'published' : ($issue->{disposition} eq 'submitted' ? 'under_review' : $issue->{disposition})),
   };
-  create_stmts($subm, $iss_spec);
+  # args: submission, review issue object, prereview issue object
+  create_stmts($subm_spec, $issue, $issues->{$issue->{prerev}});
   $log->info("Processed $i issues") unless ($i++) % 100;
 }
 
 for my $issn (sort {$a<=>$b} $lone_revs->members) {
-  my $subm = $issues->{$issn};
-  unless ($subm) {
+  my $issue = $issues->{$issn};
+  unless ($issue) {
     $log->logcarp("No review with issue number $issn");
     next;
   }
-  my $iss_spec = {
+  my $subm_spec = {
     joss_doi => sprintf( "10.21105/joss.%05d", $issn),
-    review_issue => $subm->{url},
+    repository => $issue->{info}{repo},
+    title => $issue->{title},
+#    review_issue => $issue->{url},
     review_issue_number => $issn,
-    disposition => ($subm->{disposition} eq 'submitted' ? 'under_review' : $subm->{disposition}),
+    disposition => ($issue->{disposition} eq 'submitted' ? 'under_review' : $issue->{disposition}),
   };
-  create_stmts($subm, $iss_spec);
+  create_stmts($subm_spec, $issue, undef);
 }
 
 for my $issn (sort {$a<=>$b} $lone_prerevs->members) {
-  my $subm = $issues->{$issn};
-  unless ($subm) {
+  my $issue = $issues->{$issn};
+  unless ($issue) {
     carp $log->logcarp("No review with issue number $issn");
     next;
   }
-  my $iss_spec = {
-    prereview_issue => $subm->{url},
+  my $subm_spec = {
+    repository => $issue->{info}{repo},
+    title => $issue->{title},
+#    prereview_issue => $issue->{url},
     prereview_issue_number => $issn,
-    disposition => ($subm->{disposition} eq 'submitted' ? 'review_pending' : $subm->{disposition}),
+    disposition => ($issue->{disposition} eq 'submitted' ? 'review_pending' : $issue->{disposition}),
   };
-  create_stmts($subm, $iss_spec);
+  create_stmts($subm_spec, undef, $issue);
 }
 
 say $_.';' for @cypher;
@@ -105,33 +113,28 @@ say $_.';' for @cypher;
 1;
 
 sub create_stmts {
-  my ($subm, $issue_spec) = @_;
+  my ($subm_spec, $rev_issue, $prerev_issue) = @_;
   # submission spec
-  my $s_spec = {
-    title => $subm->{title},
-    %$issue_spec,
-    repository => $subm->{info}{repo},
-  };
-  # submitter spec
+  my $issue = $rev_issue // $prerev_issue;
   my $sa_spec = {
-    handle => $subm->{info}{author}{handle},
-    $subm->{info}{author}{name} ?
-      (real_name => $subm->{info}{author}{name}) : (),
-    $subm->{info}{author}{orcid} ?
-      (orcid => $subm->{info}{author}{orcid}) : (),
+    handle => $issue->{info}{author}{handle},
+    $issue->{info}{author}{name} ?
+      (real_name => $issue->{info}{author}{name}) : (),
+    $issue->{info}{author}{orcid} ?
+      (orcid => $issue->{info}{author}{orcid}) : (),
   };
   # editor spec
-  my $ed_spec = { handle => $subm->{info}{editor} };
+  my $ed_spec = { handle => $issue->{info}{editor} };
   # reviewer specs
   my @rev_specs;
-  for my $r (@{$subm->{info}{reviewers}}) {
+  for my $r (@{$issue->{info}{reviewers}}) {
     push @rev_specs, {
       handle => $r,
      };
   }
   # paper spec
   my $p_spec;
-  if (my $paper = $subm->{paper}) {
+  if (my $paper = $issue->{paper}) {
     $p_spec = {
       title => $paper->{title},
       joss_doi => $paper->{joss_doi},
@@ -144,19 +147,47 @@ sub create_stmts {
   }
 
   # create cypher stmts
+
+  # issues
+  for my $iss ($rev_issue, $prerev_issue) {
+    next unless $iss;
+    
+    my $mrg_spec = {
+      number => $iss->{number},
+    };
+    my $upd_spec = {
+      # body => $iss->{body},
+      url => $iss->{url},
+      ( $iss->{label_names} ? (labels => join('|',@{$iss->{label_names}})) : () ),
+      created_date => $iss->{createdAt},
+      closed_date => $iss->{closedAt},
+    };
+    push @cypher, cypher->merge(ptn->N('i:issue', $mrg_spec))
+      ->on_create->set(set_arg('i', $upd_spec))
+      ->on_match->set(set_arg('i', $upd_spec));
+    
+  }
   # submission
-  my $mrg_spec = ($s_spec->{joss_doi} ? {joss_doi => $s_spec->{joss_doi}} :
-		    { prereview_issue => $s_spec->{prereview_issue}});
+  my $mrg_spec = ($subm_spec->{joss_doi} ? {joss_doi => $subm_spec->{joss_doi}} :
+		    { prereview_issue_number => $subm_spec->{prereview_issue_number}});
   my $upd_spec = {
-    $s_spec->{review_issue} ? (review_issue => $s_spec->{review_issue}) : (),
-    $s_spec->{prereview_issue} ? (prereview_issue => $s_spec->{prereview_issue}) : (),
-    $s_spec->{disposition} ? (disposition => $s_spec->{disposition}) : (),        
+    $subm_spec->{review_issue_number} ? (review_issue_number => $subm_spec->{review_issue_number}) : (),
+    $subm_spec->{prereview_issue_number} ? (prereview_issue_number => $subm_spec->{prereview_issue_number}) : (),
+    $subm_spec->{disposition} ? (disposition => $subm_spec->{disposition}) : (),        
   };
   push @cypher, cypher->merge(ptn->N('s:submission', $mrg_spec))
-    ->on_create->set(set_arg('s', $s_spec))
+    ->on_create->set(set_arg('s', $subm_spec))
     ->on_match->set(set_arg('s', $upd_spec));
-  if ($subm->{topics}) {
-    my $topics = renorm($subm->{topics});
+  if ($rev_issue) {
+    push @cypher, cypher->merge(ptn->N('s:submission',$mrg_spec)->R('r:has_review_issue')->N('i:issue', {number => $rev_issue->{number}}));
+  }
+  if ($prerev_issue) {
+    push @cypher, cypher->merge(ptn->N('s:submission',$mrg_spec)->R('r:has_prereview_issue')->N('i:issue', {number => $prerev_issue->{number}}));
+  }
+				
+  
+  if ($issue->{topics}) {
+    my $topics = renorm($issue->{topics});
     for my $k (keys %$topics) {
       my $q = cypher->match(ptn->C( ptn->N('s:submission', $mrg_spec), ptn->N('t:mtopic', {name => $k})))
 	->merge(ptn->N('s')->R('r:has_topic>')->N('t'))
@@ -217,8 +248,8 @@ sub create_stmts {
   # paper node if applicable
   if ($p_spec) {
     my @other_au_specs;
-    for my $other (@{$subm->{paper}{authors}}) {
-      next if ($other->{orcid} && ($other->{orcid} eq $subm->{info}{author}{orcid}));
+    for my $other (@{$issue->{paper}{authors}}) {
+      next if ($other->{orcid} && ($other->{orcid} eq $issue->{info}{author}{orcid}));
       push @other_au_specs,
 	{
 	  real_name => join(" ", @{$other}{qw/first_name last_name/}),
@@ -231,12 +262,17 @@ sub create_stmts {
       my $mrg_o = ($oth_spec->{orcid} ? {orcid => $oth_spec->{orcid}} : {real_name => $oth_spec->{real_name}});
       push @cypher, cypher->merge(ptn->N('o:person', $mrg_o))
 	->on_create->set(set_arg('o',$oth_spec));
+      push @cypher, cypher->match(ptn->C(ptn->N('o:person',$mrg_o),
+					 ptn->N('s:submission',$mrg_spec)))
+	->merge(ptn->N('o')->R('<:assigned_to')
+		->N('a:assignment',{role => 'author'})
+		->R('>:assigned_for')->N('s'));
     }
 
     # paper -> submission
     
     push @cypher, cypher->match( ptn->C(ptn->N('p:paper', {joss_doi => $p_spec->{joss_doi}}),
-					ptn->N('s:submission', {joss_doi => $s_spec->{joss_doi}})) )
+					ptn->N('s:submission', {joss_doi => $subm_spec->{joss_doi}})) )
       ->merge( ptn->N('p')->R(':from_submission>')->N('s') );
 
   }
