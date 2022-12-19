@@ -45,6 +45,8 @@ QRY
             title
             url
             state
+            createdAt
+            closedAt
             labels(first:20) {
               nodes {
                 name
@@ -157,6 +159,7 @@ QRY
            number
            title
            createdAt
+           closedAt
            body
         }
       }

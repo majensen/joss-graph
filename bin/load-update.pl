@@ -38,6 +38,7 @@ else {
 }
 
 my $iss = Set::Scalar->new( sort {$a<=>$b} keys %$issues );
+
  my $revs = Set::Scalar->new( grep { $issues->{$_}{title} and $issues->{$_}{title} =~ /^\[REVIEW\]/ } $iss->members );
 my $m_revs = Set::Scalar->new( grep { $issues->{$_}{prerev} } $revs->members );
 my $m_prerevs = Set::Scalar->new( map { $issues->{$_}{prerev} } $m_revs->members );
@@ -53,21 +54,22 @@ my @cypher;
 my $i=0;
 for my $issn (sort {$a<=>$b} $m_revs->members) {
   my $issue = $issues->{$issn};
-  my $url_stem = $issue->{url};
-  $url_stem =~ s/[0-9]+$//;
   unless ($issue) {
     $log->logcarp("No review with issue number $issn");
     next;
   }
+  my $url_stem = $issue->{url};
+  $url_stem =~ s/[0-9]+$//;
+  $issue->{number} = 0+$issue->{number};
   $issue->{title} =~ s/\[[^]]\]:\s*//;
   my $subm_spec = {
     joss_doi => sprintf( "10.21105/joss.%05d", $issn),
     repository => $issue->{info}{repo},
     title => $issue->{title},
 #    review_issue => $issue->{url},
-    review_issue_number => $issn,
+    review_issue_number => 0+$issn,
 #    prereview_issue => $url_stem.$issue->{prerev},
-    prereview_issue_number => $issue->{prerev},
+    prereview_issue_number => 0+$issue->{prerev},
     disposition => ($issue->{paper} ? 'published' : ($issue->{disposition} eq 'submitted' ? 'under_review' : $issue->{disposition})),
   };
   # args: submission, review issue object, prereview issue object
@@ -81,12 +83,13 @@ for my $issn (sort {$a<=>$b} $lone_revs->members) {
     $log->logcarp("No review with issue number $issn");
     next;
   }
+  $issue->{number} = 0+$issue->{number};
   my $subm_spec = {
     joss_doi => sprintf( "10.21105/joss.%05d", $issn),
     repository => $issue->{info}{repo},
     title => $issue->{title},
 #    review_issue => $issue->{url},
-    review_issue_number => $issn,
+    review_issue_number => 0+$issn,
     disposition => ($issue->{disposition} eq 'submitted' ? 'under_review' : $issue->{disposition}),
   };
   create_stmts($subm_spec, $issue, undef);
@@ -98,17 +101,22 @@ for my $issn (sort {$a<=>$b} $lone_prerevs->members) {
     carp $log->logcarp("No review with issue number $issn");
     next;
   }
+  $issue->{number} = 0+$issue->{number};  
   my $subm_spec = {
     repository => $issue->{info}{repo},
     title => $issue->{title},
 #    prereview_issue => $issue->{url},
-    prereview_issue_number => $issn,
+    prereview_issue_number => 0+$issn,
     disposition => ($issue->{disposition} eq 'submitted' ? 'review_pending' : $issue->{disposition}),
   };
   create_stmts($subm_spec, undef, $issue);
 }
 
-say $_.';' for @cypher;
+# strip quotes around integers
+for (@cypher) {
+  s/'([0-9]+)'/$1/g;
+  say $_.';';
+}
 
 1;
 
@@ -153,7 +161,7 @@ sub create_stmts {
     next unless $iss;
     
     my $mrg_spec = {
-      number => $iss->{number},
+      number => 0+$iss->{number},
     };
     my $upd_spec = {
       # body => $iss->{body},
@@ -179,10 +187,18 @@ sub create_stmts {
     ->on_create->set(set_arg('s', $subm_spec))
     ->on_match->set(set_arg('s', $upd_spec));
   if ($rev_issue) {
-    push @cypher, cypher->merge(ptn->N('s:submission',$mrg_spec)->R('r:has_review_issue')->N('i:issue', {number => $rev_issue->{number}}));
+    push @cypher, cypher
+      ->match(ptn->C(ptn->N('s:submission',$mrg_spec),
+		     ptn->N('i:issue', {number => $rev_issue->{number}})
+		    ))
+      ->merge(ptn->N('s')->R('r:has_review_issue')->N('i'));
   }
   if ($prerev_issue) {
-    push @cypher, cypher->merge(ptn->N('s:submission',$mrg_spec)->R('r:has_prereview_issue')->N('i:issue', {number => $prerev_issue->{number}}));
+    push @cypher, cypher
+      ->match(ptn->C(ptn->N('s:submission',$mrg_spec),
+		     ptn->N('i:issue', {number => $prerev_issue->{number}})
+		    ))
+      ->merge(ptn->N('s')->R('r:has_prereview_issue')->N('i'));
   }
 				
   
