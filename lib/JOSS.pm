@@ -17,37 +17,43 @@ use strict;
 use warnings;
 
 our $VERSION = '0.100';
-our @EXPORT_OK = qw/CHUNK get_last_issue_num get_last_issues get_issue_by_num get_paper_text model_subm_topics find_prerev_for_rev find_xml_for_accepted latest_issn $ng $nq $wd/;
+our @EXPORT_OK = qw/CHUNK/;
+# get_last_issue_num get_last_issues get_issue_by_num get_paper_text model_subm_topics find_prerev_for_rev find_xml_for_accepted latest_issn $ng $nq $wd/;
+our $AUTOLOAD;
 
 sub CHUNK { 50 }
-our $nq = JOSS::NeoQueries->new();
-our $wd = JOSS::WhedonSlurp->new();
-my $pw = $ENV{GHCRED};
-unless ($pw) {
-  if ( -e "$ENV{HOME}/.git-credentials" ) {
-    open my $cred, "$ENV{HOME}/.git-credentials" or get_logger()->logdie("Problem with .git-credentials: $!");
-    my @cred = <$cred>;
-    $pw = Mojo::URL->new($cred[0])->password;
-  }
-}
-our $ng = Net::GitHub::V4->new(
-  access_token => $pw,
- );
 
-sub latest_issn {
-  $nq->latest_issn;
+sub new {
+  my ($class, $neo_url) = @_;
+  my ($self) = {};
+  bless $self, $class;
+  $self->{_nq} = JOSS::NeoQueries->new($neo_url);
+  $self->{_wd} = JOSS::WhedonSlurp->new();
+  my $pw = $ENV{GHCRED};
+  unless ($pw) {
+    if ( -e "$ENV{HOME}/.git-credentials" ) {
+      open my $cred, "$ENV{HOME}/.git-credentials" or get_logger()->logdie("Problem with .git-credentials: $!");
+      my @cred = <$cred>;
+      $pw = Mojo::URL->new($cred[0])->password;
+    }
+  }
+  $self->{_ng} = Net::GitHub::V4->new(
+    access_token => $pw,
+   );
+  return $self;
 }
 
 sub get_last_issues {
-  my ($nr) = @_;
+  my ($self, $nr) = @_;
   my $dta;
   my $cursor;
   my %issues;
   my $log = get_logger();
   while ($nr > 0) {
     my $c = ($nr < CHUNK ? $nr : CHUNK);
+    $log->debug("Query Github for $c issues");
     try {
-      $dta = $ng->query( make_qry('last_n_issues',
+      $dta = $self->{_ng}->query( make_qry('last_n_issues',
 				  { chunk => $c,
 				    cursor => $cursor}));
     } catch {
@@ -55,51 +61,59 @@ sub get_last_issues {
       last;
     };
     for my $issue ( @{$dta->{data}{organization}{repository}{issues}{nodes}} ) {
-      $issues{$issue->{number}} = parse_issue($issue);
+      $issues{$issue->{number}} = $self->parse_issue($issue);
     }
     $cursor = $dta->{data}{organization}{repository}{issues}{pageInfo}{startCursor};
     print STDERR ".";
     $nr -= $c;
   }
+  $log->debug("Finished Github query for issues");
   print STDERR "done\n";
   return \%issues;
 }
 
 sub get_issue_by_num {
-  my ($num) = @_;
+  my ($self, $num) = @_;
   my $dta;
   my $log = get_logger();
+  $log->debug("Query Github for issue number $num");
   try {
-    $dta = $ng->query( make_qry('issue_by_number', { number => $num }) );
+    $dta = $self->{_ng}->query( make_qry('issue_by_number', { number => $num }) );
   } catch {
     $log->logcarp("issue_by_number query failed: $_");
     return;
   };
+  $log->debug("Finished Github query for issue number $num");
   my $issue = $dta->{data}{organization}{repository}{issue};
-  return parse_issue($issue);
+  return $self->parse_issue($issue);
 }
 
 sub get_last_issue_num {
+  my $self = shift;
   my $dta;
   my $log = get_logger();
+  $log->debug("Query Github for last issue number");
   try {
-    $dta = $ng->query( make_qry('last_issue_number') );
+    $dta = $self->{_ng}->query( make_qry('last_issue_number') );
   } catch {
     $log->logcarp("last_issue_number query failed: $_");
     return;
   };
+  $log->debug("Finished Github query for last issue number");
   return 0+${$dta->{data}{organization}{repository}{issues}{nodes}}[0]->{number};
 }
 
 sub find_prerev_for_rev {
-  my ($issn) = @_;
+  my ($self, $issn) = @_;
   my $dta;
   my $log = get_logger();
+  $log->debug("Query Github to find prereview issue for review issue $issn");
   try {
-    $dta = $ng->query( make_qry('prereview_issue_by_review_issue', { number => $issn } ) );
+    $dta = $self->{_ng}->query( make_qry('prereview_issue_by_review_issue', { number => $issn } ) );
   } catch {
     $log->logcarp("prereview_issue_by_review_issue: query on $issn failed: $_");
   };
+  $log->debug("Finished Github query for prereview issue");
   my $nodes = $dta->{data}{organization}{repository}{issue}{timelineItems}{edges};
   for (@$nodes) {
     my $src = $_->{node}{source};
@@ -112,16 +126,18 @@ sub find_prerev_for_rev {
 }
 
 sub find_xml_for_accepted {
-  my ($issn) = @_;
+  my ($self, $issn) = @_;
   my $ua = Mojo::UserAgent->new();
   my $dta;
   my $log = get_logger();
+  $log->debug("Query Github to find publication comment for issue $issn");
   try {
-    $dta = $ng->query( make_qry('last_n_comments_of_issue', { number => $issn, chunk => 15 } ) );
+    $dta = $self->{_ng}->query( make_qry('last_n_comments_of_issue', { number => $issn, chunk => 15 } ) );
   } catch {
     $log->logcarp("last_n_comments_of_issue: query on $issn failed: $_");
     next;
   };
+  $log->debug("Finished Github query for publication comment");
   my @cmts = @{$dta->{data}{organization}{repository}{issue}{comments}{nodes}};
   my @whd = grep { $_->{author}{login} =~ /whedon|editorialbot/ and $_->{body} =~ /NOT A DRILL/ } @cmts;
   if (@whd) {
@@ -153,11 +169,11 @@ sub find_xml_for_accepted {
 }
 
 sub get_paper_text {
-  my ($issue) = @_;
+  my ($self, $issue) = @_;
   my ($in, $out, $err);
   my $log = get_logger();
+  $log->debug("Attempt to get paper text for issue $$issue{number}");
   $log->info("Sparse, shallow pull $$issue{info}{repo}");
-  $DB::single=1;
   my $branch = $issue->{info}{branch} ? "--branch $$issue{info}{branch}" : "";
   my $pull_repo = [split / +/, "git clone --sparse --depth 1 $branch $$issue{info}{repo} josstest"];
   my $add_paper_dir = [split / +/, "git sparse-checkout add paper"];
@@ -180,7 +196,7 @@ sub get_paper_text {
   
   my ($loc) = split /\n/,$out;
   unless ($loc and $loc =~ /\bjosstest\b/) {
-    $log->logcarp("find returned '$loc'");
+    $log->logcarp("paper.md not found in repo as pulled");
     rmtree("./josstest");
     print STDERR "fail\n";
     return;
@@ -197,7 +213,7 @@ sub get_paper_text {
 }
 
 sub model_subm_topics {
-  my ($issue) = @_;
+  my ($self, $issue) = @_;
   my ($in, $out, $err);
   my $log = get_logger();
   unless ($issue->{paper_text}) {
@@ -219,10 +235,10 @@ sub model_subm_topics {
 }
 
 sub parse_issue {
-  my ($issue) = @_;
+  my ($self, $issue) = @_;
   my $log = get_logger();
-  $log->info("Parsing issue $issue->{number}");
-  $wd->parse_issue_body( $issue );
+  $log->debug("Parsing issue $issue->{number}");
+  $self->{_wd}->parse_issue_body( $issue );
   my @lbls;
   for my $l (@{$issue->{labels}{nodes}}) {
     push @lbls, $l->{name};
@@ -251,9 +267,11 @@ sub parse_issue {
       }
     }
   }
+  $log->debug("Issue $$issue{number} parsed");
   return $issue;
 }
 
+# local
 # determine disposition from review labels
 sub dispo {
   my ($labels, $state) = @_;
@@ -279,6 +297,14 @@ sub dispo {
     }
   }
   return $dispo;
+}
+
+sub AUTOLOAD {
+  my $self = shift;
+  my $method = $AUTOLOAD;
+  $method =~ s/.*:://;
+  return if $method eq 'DESTROY';
+  return $self->{_nq}->$method;
 }
 
 1;

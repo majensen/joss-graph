@@ -3,56 +3,45 @@ use v5.10;
 use Carp qw/carp croak/;
 use Try::Tiny;
 use Log::Log4perl::Tiny qw/:easy/;
-use DBI;
+use Neo4j::Driver;
 
 my $log = get_logger();
 our %neo_queries;
-$ENV{NEODSN} //= 'dbi:Neo4p:db=http://127.0.0.1:7474';
-$ENV{NEOUSER}='neo4j';
-$ENV{NEOPASS}='j4oen';
-$dbh->{RaiseError} = 1;
+$ENV{NEO_URL} //= 'http://127.0.0.1:7474';
 
 sub new {
-  my ($class, $dsn, $user, $pass) = @_;
+  my ($class, $url, $user, $pass) = @_;
   my $self = {};
-  $dsn //= $ENV{NEODSN};
+  $url //= $ENV{NEO_URL};
   $user //= $ENV{NEOUSER};
   $pass //= $ENV{NEOPASS};
   bless $self, $class;
-  my $sth;
-  my $dbh = $self->{_dbh} = DBI->connect($dsn,$user,$pass);
-  for (keys %neo_queries) {
+  my $results;
+  my $driver = $self->{_driver} = Neo4j::Driver->new($url);
+  if ($user) {
+    $driver->basic_auth($user, $pass);
+  }
+  for ($self->available_queries) {
     try {
-      $sth->{$_} = $dbh->prepare($neo_queries{$_});
+      $results->{$_} = $driver->session->run($neo_queries{$_});
+      push @{$self->{_lists}{$_}}, map {$_->get('issn')} $results->{$_}->list;
     } catch {
-      $log->logcarp("query $_: prepare error - $_");
-    };
-    try {
-      $sth->{$_}->execute;
-      while (my $r = $sth->{$_}->fetch) {
-	push @{$self->{_lists}{$_}}, $r->[0];
-      }
-    } catch {
-      $log->logcarp("query $_: execute error - $_");
+      $log->logcarp("query $_: session/run error - $_");
     };
   }
   return $self;
   
 }
 
-sub dbh { shift->{_dbh} }
+sub driver { shift->{_driver} }
 
 sub latest_issn {
   my $self = shift;
   unless ($self->{_latest_issn}) {
-    my $qry = <<QRY;
-match (s:submission) with [toInteger(replace(s.prereview_issue, "https://github.com/openjournals/joss-reviews/issues/","")), toInteger(replace(s.review_issue, "https://github.com/openjournals/joss-reviews/issues/",""))] as l with l unwind l as ll with ll where ll is not null return  max(ll);
-QRY
-    my $sth = $self->dbh->prepare($qry);
-    $sth->execute;
-    my $r = $sth->fetch;
+    my $qry = "match (i:issue) return max(i.number) as latest";
+    my $r = $self->driver->session->run($qry)->single->get('latest');
     $r || $log->logcroak("latest_issn: No latest issue returned - is this the right db?");
-    $self->{_latest_issue} = $r->[0];
+    $self->{_latest_issue} = $r;
   }
   return $self->{_latest_issue};
 }
@@ -74,19 +63,19 @@ sub DESTROY { }
 
 %neo_queries = (
   review_pending_has_topics => <<QRY,
-match (s:submission {disposition:"review_pending"}) where (s)-[:has_topic]->() with toInteger(replace(s.prereview_issue, "https://github.com/openjournals/joss-reviews/issues/","")) as issn return issn
+match (s:submission {disposition:"review_pending"}) where (s)-[:has_topic]->() with s.prereview_issue_number as issn return issn
 QRY
   review_pending_no_topics => <<QRY,
-match (s:submission {disposition:"review_pending"}) where not (s)-[:has_topic]->() with toInteger(replace(s.prereview_issue, "https://github.com/openjournals/joss-reviews/issues/","")) as issn return issn
+match (s:submission {disposition:"review_pending"}) where not (s)-[:has_topic]->() with s.prereview_issue_number as issn return issn
 QRY
   under_review => <<QRY,
-match (s:submission {disposition:"under_review"}) with toInteger(replace(s.review_issue, "https://github.com/openjournals/joss-reviews/issues/","")) as issn return issn
+match (s:submission {disposition:"under_review"}) with s.review_issue_number as issn return issn
 QRY
   paused_rev => <<QRY,
-match (s:submission {disposition:"paused"}) where exists(s.review_issue) with toInteger(replace(s.review_issue, "https://github.com/openjournals/joss-reviews/issues/","")) as issn return issn
+match (s:submission {disposition:"paused"})-[:has_review_issue]->(i:issue) return i.number as issn
 QRY
   paused_prerev => <<QRY,  
-match (s:submission {disposition:"paused"}) where not exists(s.review_issue) and exists(s.prereview_issue) with toInteger(replace(s.prereview_issue, "https://github.com/openjournals/joss-reviews/issues/","")) as issn return issn
+match (s:submission {disposition:"paused"})-[:has_prereview_issue]->(i:issue) where not (s)-[:has_review_issue]->(:issue) return i.number as issn
 QRY
  );
 
