@@ -2,6 +2,7 @@ package JOSS::NeoQueries;
 use v5.10;
 use Carp qw/carp croak/;
 use Try::Tiny;
+use Set::Scalar;
 use Log::Log4perl::Tiny qw/:easy/;
 use Neo4j::Driver;
 
@@ -24,7 +25,9 @@ sub new {
   for ($self->available_queries) {
     try {
       $results->{$_} = $driver->session->run($neo_queries{$_});
-      push @{$self->{_lists}{$_}}, map {$_->get('issn')} $results->{$_}->list;
+      $self->{_lists}{$_} =
+	Set::Scalar->new( map {$_->get('issn')} $results->{$_}->list );
+      
     } catch {
       $log->logcarp("query $_: session/run error - $_");
     };
@@ -56,7 +59,7 @@ sub AUTOLOAD {
   unless (grep /^$method/, keys %neo_queries) {
     $log->logcroak("Method '$method' not defined in package ".__PACKAGE__);
   }
-  return @{$self->{_lists}{$method}};
+  return $self->{_lists}{$method};
 }
 
 sub DESTROY { }

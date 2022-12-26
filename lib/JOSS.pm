@@ -56,10 +56,19 @@ sub get_last_issues {
       $dta = $self->{_ng}->query( make_qry('last_n_issues',
 				  { chunk => $c,
 				    cursor => $cursor}));
+      if (!$dta || ! scalar(keys %$dta)) {
+	$log->logcroak("last_n_issues query returned no data");
+      }
+      elsif ($$dta{message}) {
+	$log->logcroak("last_n_issues query failed with msg: '$$dta{message}'");
+      }
     } catch {
       $log->logcarp("last_n_issues query failed: $_");
-      last;
+      undef $dta;
     };
+    unless ($dta) {
+      return;
+    }
     for my $issue ( @{$dta->{data}{organization}{repository}{issues}{nodes}} ) {
       $issues{$issue->{number}} = $self->parse_issue($issue);
     }
@@ -79,13 +88,23 @@ sub get_issue_by_num {
   $log->debug("Query Github for issue number $num");
   try {
     $dta = $self->{_ng}->query( make_qry('issue_by_number', { number => $num }) );
+    if ($$dta{message}) {
+	$log->logcroak("last_n_issues query failed with msg: '$$dta{message}'");
+	return;
+      }
   } catch {
     $log->logcarp("issue_by_number query failed: $_");
-    return;
+    undef $dta;
   };
-  $log->debug("Finished Github query for issue number $num");
-  my $issue = $dta->{data}{organization}{repository}{issue};
-  return $self->parse_issue($issue);
+  if ($dta) {
+    $log->debug("Finished Github query for issue number $num");
+    my $issue = $dta->{data}{organization}{repository}{issue};
+    return unless $issue;
+    return $self->parse_issue($issue);
+  }
+  else {
+    return;
+  }
 }
 
 sub get_last_issue_num {
@@ -95,12 +114,21 @@ sub get_last_issue_num {
   $log->debug("Query Github for last issue number");
   try {
     $dta = $self->{_ng}->query( make_qry('last_issue_number') );
+    if ($$dta{message}) {
+      $log->logcroak("last_n_issues query failed with msg: '$$dta{message}'");
+      return;
+    }
   } catch {
     $log->logcarp("last_issue_number query failed: $_");
-    return;
+    undef $dta
   };
-  $log->debug("Finished Github query for last issue number");
-  return 0+${$dta->{data}{organization}{repository}{issues}{nodes}}[0]->{number};
+  if ($dta) {
+    $log->debug("Finished Github query for last issue number");
+    return 0+${$dta->{data}{organization}{repository}{issues}{nodes}}[0]->{number};
+  }
+  else {
+    return;
+  }
 }
 
 sub find_prerev_for_rev {
@@ -110,19 +138,28 @@ sub find_prerev_for_rev {
   $log->debug("Query Github to find prereview issue for review issue $issn");
   try {
     $dta = $self->{_ng}->query( make_qry('prereview_issue_by_review_issue', { number => $issn } ) );
+    if ($$dta{message}) {
+      $log->logcroak("last_n_issues query failed with msg: '$$dta{message}'");
+      return;
+    }
   } catch {
     $log->logcarp("prereview_issue_by_review_issue: query on $issn failed: $_");
+    undef $dta;
   };
-  $log->debug("Finished Github query for prereview issue");
-  my $nodes = $dta->{data}{organization}{repository}{issue}{timelineItems}{edges};
-  for (@$nodes) {
-    my $src = $_->{node}{source};
-    if ($src->{author}{login} =~ /whedon|editorialbot/ and $src->{title} =~ /^\s*\[PRE\s*REVIEW\]/) {
-      return 0+$src->{number};
+  if ($dta) {
+    $log->debug("Finished Github query for prereview issue");
+    my $nodes = $dta->{data}{organization}{repository}{issue}{timelineItems}{edges};
+    for (@$nodes) {
+      my $src = $_->{node}{source};
+      if ($src->{author}{login} =~ /whedon|editorialbot/ and $src->{title} =~ /^\s*\[PRE\s*REVIEW\]/) {
+	return 0+$src->{number};
+      }
     }
   }
-  $log->logcarp("No pre-review issue found for $issn");
-  return;
+  else {
+    $log->logcarp("No pre-review issue found for $issn");
+    return;
+  }
 }
 
 sub find_xml_for_accepted {
@@ -133,34 +170,42 @@ sub find_xml_for_accepted {
   $log->debug("Query Github to find publication comment for issue $issn");
   try {
     $dta = $self->{_ng}->query( make_qry('last_n_comments_of_issue', { number => $issn, chunk => 15 } ) );
-  } catch {
-    $log->logcarp("last_n_comments_of_issue: query on $issn failed: $_");
-    next;
-  };
-  $log->debug("Finished Github query for publication comment");
-  my @cmts = @{$dta->{data}{organization}{repository}{issue}{comments}{nodes}};
-  my @whd = grep { $_->{author}{login} =~ /whedon|editorialbot/ and $_->{body} =~ /NOT A DRILL/ } @cmts;
-  if (@whd) {
-    my $info;
-    my $txt = $whd[0]{body};
-    $txt =~ m|(https://github.com/openjournals/joss-papers/pull/([0-9]+)).*
-	      (https://doi.org/(10.21105)/(joss.([0-9]+)))|sx;
-    @{$info}{qw/pull pull_issue doi pfx sfx ppr_issue/} = ($1,$2,$3,$4, $5, 0+$6);
-    
-    my $stem = "https://github.com/openjournals/joss-papers/raw/master";
-    my $url = join('/', $stem, $info->{sfx}, join('.',$info->{pfx},$info->{sfx},"crossref.xml"));
-    my $res = $ua->max_redirects(5)->get($url)->result; # ->content->asset->move_to(<file>)
-    if ($res->is_success) {
-      my $xrf = JOSS::Crossref->new($res);
-      return $xrf;
-      1;
-    }
-    else {
-      $log->logcarp("Couldn't retrieve '$url' - status ".$res->code);
+    if ($$dta{message}) {
+      $log->logcroak("last_n_issues query failed with msg: '$$dta{message}'");
       return;
     }
-      
+  } catch {
+    $log->logcarp("last_n_comments_of_issue: query on $issn failed: $_");
+    undef $dta;
+  };
+  if ($dta) {
+    $log->debug("Finished Github query for publication comment");
+    my @cmts = @{$dta->{data}{organization}{repository}{issue}{comments}{nodes}};
+    my @whd = grep { $_->{author}{login} =~ /whedon|editorialbot/ and $_->{body} =~ /NOT A DRILL/ } @cmts;
+    if (@whd) {
+      my $info;
+      my $txt = $whd[0]{body};
+      $txt =~ m|(https://github.com/openjournals/joss-papers/pull/([0-9]+)).*
+		(https://doi.org/(10.21105)/(joss.([0-9]+)))|sx;
+      @{$info}{qw/pull pull_issue doi pfx sfx ppr_issue/} = ($1,$2,$3,$4, $5, 0+$6);
+    
+      my $stem = "https://github.com/openjournals/joss-papers/raw/master";
+      my $url = join('/', $stem, $info->{sfx}, join('.',$info->{pfx},$info->{sfx},"crossref.xml"));
+      my $res = $ua->max_redirects(5)->get($url)->result; # ->content->asset->move_to(<file>)
+      if ($res->is_success) {
+	my $xrf = JOSS::Crossref->new($res);
+	return $xrf;
+	1;
+      }
+      else {
+	$log->logcarp("Couldn't retrieve '$url' - status ".$res->code);
+	return;
+      }
     1;
+    }
+    else {
+      return;
+    }
   }
   else {
     return;
@@ -178,6 +223,7 @@ sub get_paper_text {
   my $pull_repo = [split / +/, "git clone --sparse --depth 1 $branch $$issue{info}{repo} josstest"];
   my $add_paper_dir = [split / +/, "git sparse-checkout add paper"];
   my $find_paper = [split / /,"find josstest -name paper.md"];
+  my $disable_sparse = [split / /,"git sparse-checkout disable"];
   # attempt to pull repo
   $in = "\n\n"; # get past logins
   unless( run $pull_repo,\$in,\$out,\$err ) {
@@ -196,6 +242,12 @@ sub get_paper_text {
   
   my ($loc) = split /\n/,$out;
   unless ($loc and $loc =~ /\bjosstest\b/) {
+    $in=$out=$err='';
+    run( $disable_sparse, init => sub { chdir "josstest" or $log->logcarp($!); } );
+    run ($find_paper, \$in, \$out, \$err);
+    ($loc) = split /\n/,$out;
+  }
+  unless ($loc and $loc =~ /\bjosstest\b/) {      
     $log->logcarp("paper.md not found in repo as pulled");
     rmtree("./josstest");
     print STDERR "fail\n";
@@ -221,8 +273,9 @@ sub model_subm_topics {
     return;
   }
   $log->info("Model paper topics for issue $issue->{number}");
-  my ($f, $fh) = tempfile();
-  print $fh, $issue->{paper_text};
+  my ($fh, $f) = tempfile();
+  binmode $fh, ":utf8";
+  print $fh $issue->{paper_text};
   $fh->flush;
   unless (run [split / /,"./topicize.r $f"], \$in, \$out,\$err) {
     $log->logcarp("error in topicize.r:\n$err");
@@ -247,10 +300,10 @@ sub parse_issue {
   $issue->{disposition} = dispo([map {$_->{name}} @{$issue->{labels}{nodes}}],$issue->{state});
   if ($issue->{title} =~ /^\s*\[REVIEW/) {
     my $issn = $issue->{number};
-    my $prn = find_prerev_for_rev($issn);
+    my $prn = $self->find_prerev_for_rev($issn);
     $issue->{prerev} = $prn if $prn;
     if ($issue->{disposition} eq 'accepted') { # get publication info
-      my $xrf = find_xml_for_accepted($issn);
+      my $xrf = $self->find_xml_for_accepted($issn);
       if ($xrf) {
 	$issue->{disposition} = 'published';
 	my $p = {};
