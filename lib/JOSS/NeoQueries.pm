@@ -1,6 +1,5 @@
 package JOSS::NeoQueries;
 use v5.10;
-use Carp qw/carp croak/;
 use Try::Tiny;
 use Set::Scalar;
 use Log::Log4perl::Tiny qw/:easy/;
