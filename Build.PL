@@ -9,6 +9,7 @@ $build = Module::Build->new(
   configure_requires => {
     'Module::Build' => 0,
   },
+  share_dir => 'model',
   requires => {
     'JSON::ize' => 0.202,
     'utf8::all' => 0,

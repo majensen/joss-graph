@@ -1,11 +1,13 @@
 bin/load-update.pl
 bin/update-ghquery.pl
 bin/minisrv.pl
+model/mlda.40.rdsv2
 Build.PL
 lib/JOSS.pm
 lib/JOSS/Crossref.pm
 lib/JOSS/GHQueries.pm
 lib/JOSS/NeoQueries.pm
 lib/JOSS/WhedonSlurp.pm
+lib/JOSS/Recommender.pm
 MANIFEST			This list of files
 README.md

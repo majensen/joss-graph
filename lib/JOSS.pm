@@ -11,6 +11,7 @@ use Mojo::UserAgent;
 use IPC::Run qw/run timeout/;
 use File::Path qw/rmtree/;
 use File::Temp qw/tempfile/;
+use File::ShareDir qw/dist_file/;
 use Log::Log4perl::Tiny qw/:easy build_channels/;
 use Try::Tiny;
 use strict;
@@ -18,7 +19,7 @@ use warnings;
 
 our $VERSION = '0.100';
 our @EXPORT_OK = qw/CHUNK/;
-# get_last_issue_num get_last_issues get_issue_by_num get_paper_text model_subm_topics find_prerev_for_rev find_xml_for_accepted latest_issn $ng $nq $wd/;
+
 our $AUTOLOAD;
 
 sub CHUNK { 50 }
@@ -272,12 +273,19 @@ sub model_subm_topics {
     $log->logcarp("No paper text for issue $issue->{number}");
     return;
   }
+  my $model;
+  try {
+    $model = dist_file('JOSS-graph','mlda.40.rdsv2');
+  } catch {
+    $model = 'mlda.40.rdsv2';
+  };
+    
   $log->info("Model paper topics for issue $issue->{number}");
   my ($fh, $f) = tempfile();
   binmode $fh, ":utf8";
   print $fh $issue->{paper_text};
   $fh->flush;
-  unless (run [split / /,"./topicize.r $f"], \$in, \$out,\$err) {
+  unless (run [split / /,"topicize.r -m $model $f"], \$in, \$out,\$err) {
     $log->logcarp("error in topicize.r:\n$err");
     print STDERR "fail\n";
     return;
