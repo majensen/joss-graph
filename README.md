@@ -166,23 +166,6 @@ To update the database, run the following container:
 	   
 See [the cron directory](./cron) for scripts to perform this
 unattended at intervals.
-
-
-
-
-
-
-Run the following command to instantiate JOSS-graph in a container:
-
-	docker run -d -e "GHCRED=<your_github_pass_or_token>" \
-	  -p 7474:7474 -p 7473:7473 -p 7687:7687 -p 3001:3001 maj1/fortinbras:joss-graph
-
-Point a browser to https://localhost:7473 or http://localhost:7474 to explore the database.
-The neo4j instance is configured to be accessed without authentication.
-
-Remove the `-p 3001:3001` option from the `docker run` command to hide the control server, and perform updates with the following command:
-
-	docker exec -it <container> curl http://localhost:3001/update
 	
 # License
 
