@@ -17,7 +17,7 @@ use Try::Tiny;
 use strict;
 use warnings;
 
-our $VERSION = '0.100';
+our $VERSION = '0.200';
 our @EXPORT_OK = qw/CHUNK/;
 
 our $AUTOLOAD;

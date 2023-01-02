@@ -14,7 +14,7 @@ use warnings;
 
 my $NORM_TO = 0.95;
 my $log = get_logger();
-$log->fh( build_channels( file_append => 'minisrv.log' ) );
+$log->fh( build_channels( fh => \*STDERR, file_append => 'minisrv.log' ) );
 my $issues;
 my $fn = $ARGV[0];
 if ($fn) {
@@ -66,9 +66,7 @@ for my $issn (sort {$a<=>$b} $m_revs->members) {
     joss_doi => sprintf( "10.21105/joss.%05d", $issn),
     repository => $issue->{info}{repo},
     title => $issue->{title},
-#    review_issue => $issue->{url},
     review_issue_number => 0+$issn,
-#    prereview_issue => $url_stem.$issue->{prerev},
     prereview_issue_number => 0+$issue->{prerev},
     disposition => ($issue->{paper} ? 'published' : ($issue->{disposition} eq 'submitted' ? 'under_review' : $issue->{disposition})),
   };
@@ -88,7 +86,6 @@ for my $issn (sort {$a<=>$b} $lone_revs->members) {
     joss_doi => sprintf( "10.21105/joss.%05d", $issn),
     repository => $issue->{info}{repo},
     title => $issue->{title},
-#    review_issue => $issue->{url},
     review_issue_number => 0+$issn,
     disposition => ($issue->{disposition} eq 'submitted' ? 'under_review' : $issue->{disposition}),
   };
@@ -98,14 +95,13 @@ for my $issn (sort {$a<=>$b} $lone_revs->members) {
 for my $issn (sort {$a<=>$b} $lone_prerevs->members) {
   my $issue = $issues->{$issn};
   unless ($issue) {
-    carp $log->logcarp("No review with issue number $issn");
+    $log->logcarp("No review with issue number $issn");
     next;
   }
   $issue->{number} = 0+$issue->{number};  
   my $subm_spec = {
     repository => $issue->{info}{repo},
     title => $issue->{title},
-#    prereview_issue => $issue->{url},
     prereview_issue_number => 0+$issn,
     disposition => ($issue->{disposition} eq 'submitted' ? 'review_pending' : $issue->{disposition}),
   };
@@ -164,7 +160,6 @@ sub create_stmts {
       number => 0+$iss->{number},
     };
     my $upd_spec = {
-      # body => $iss->{body},
       url => $iss->{url},
       ( $iss->{label_names} ? (labels => join('|',@{$iss->{label_names}})) : () ),
       created_date => $iss->{createdAt},

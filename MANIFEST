@@ -1,6 +1,8 @@
 bin/load-update.pl
 bin/update-ghquery.pl
 bin/minisrv.pl
+bin/topicize.r
+bin/update.sh
 model/mlda.40.rdsv2
 Build.PL
 lib/JOSS.pm

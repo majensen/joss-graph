@@ -21,7 +21,6 @@ $build = Module::Build->new(
     'Neo4j::Driver' => 0.33,
     'Neo4j::Cypher::Abstract' => 0.1003,
     'Set::Scalar' => 0,
-    'Mojolicious' => 8.29,
     'Mojo::URL' => 0,
     'Mojo::UserAgent' => 0,
     'Net::GitHub::V4' => 0,
