@@ -1,0 +1,12 @@
+#!/bin/bash
+set -eux
+if test -s /var/log/jglog/jossgraph.log
+then
+    if docker inspect jg_updater > /dev/null
+    then
+	exit 0
+    else
+	logger -p syslog.info -f /var/log/jglog/jossgraph.log
+	rm /var/log/jglog/jossgraph.log
+    fi
+fi

@@ -1,0 +1,3 @@
+#!/bin/bash
+set -eux
+docker run -d --name jg_updater --rm --env-file /etc/joss/jossenv -v/var/log/jglog:/var/log maj1/jg_manager
