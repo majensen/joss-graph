@@ -2,8 +2,6 @@
 
 Github scraping utilities for creating and maintaining a Neo4j graph database for [JOSS](https://joss.theoj.org) submission, review, and publication activities
 
-A [Docker container](#Docker) is available containing the database and updaters.
-
 # Database stats
 
 TBD
@@ -20,12 +18,13 @@ The graph model is described in [joss-model.yaml](./joss-model.yaml). The format
 
 ![JOSS graph diagram](./joss-graph.svg)
 
-There are four main nodes:
+There are five main nodes:
 
  * person
  * assignment
  * submission
  * paper
+ * issue
  
 ## _person_ 
 
@@ -36,7 +35,7 @@ A _person_ node represents an individual. It records the following properties:
  *  _email_ (if available)
  * _affiliation_ (if available)
 
-Reviewers who have provided langugage and topic preferences have _person_ nodes linked to _language_ and _topic_ nodes. _language_ nodes possess the _name_ property, _topic_ nodes the _content_ property. The property values are normalized to lower case and use only spaces for whitespace.
+Reviewers who have provided langugage and topic preferences have _person_ nodes may be linked to _language_ and _topic_ nodes. _language_ nodes possess the _name_ property, _topic_ nodes the _content_ property. The property values are normalized to lower case and use only spaces for whitespace.
 
 ## _submission_
 
@@ -46,8 +45,22 @@ A _submission_ node records an instance of formal submission to JOSS as an insta
  * _disposition_, one of (review\_pending, under\_review, paused, accepted, published, withdrawn, rejected, closed)
  * _joss_doi_
  * _repository_, URL of the submission's Github repo
- * _prerev\_issue_, URL of the submissions's pre-review issue
- * _review\_issue_, URL of the submissions's review issue (if any)
+ * _prerev\_issue\_number_, Issue number of the submissions's pre-review issue
+ * _review\_issue\_number_, Issue number of the submissions's review issue (if any)
+
+_submission_ nodes are linked to _issue_ nodes by _has\_prereview\_issue_ and
+_has\_review\_issue_ relationships.
+
+## _issue_
+
+An _issue_ node represents a Github issue. It has the following properties:
+
+* _number_
+* _closed\_date_, a datetime in ISO 8601 UTC, e.g., `2019-06-30T23:15:13Z`
+* _created\_date_, in ISO 8601 UTC
+* _url_, the Github URL of the issue
+* _labels_, a single string of Github labels on the issue, separated by the pipe character `|`
+
 
 ## _paper_
 
@@ -56,11 +69,10 @@ _paper_ nodes record the location and doi information of published submissions. 
  * _title_
  * _joss\_doi_
  * _archive\_doi_, [DOI](https://en.wikipedia.org/wiki/Digital_object_identifier) of the software archive for the paper, frequently found on [Zenodo](https://zenodo.org/)
- * _url_
- * _published\_date_ (MM-YYYY)
+ * _url_ at https://joss.theoj.org
+ * _published\_date_ (YYYY-MM)
  * _volume_, JOSS volume number
  * _issue_, JOSS issue number
-
 
 ## _assignment_
 
@@ -106,23 +118,59 @@ The following scripts are provided here to update a current Neo4j instance of JO
   * [update-ghquery.pl](./bin/update-ghquery.pl) - queries both the graph and the GitHub GraphQL (a.k.a. v4) endpoint to update submissions and publications
   
   * [load-update.pl](./bin/load-update.pl) - converts the JSON output of update-ghquery.pl into [Cypher](https://neo4j.com/docs/cypher-manual/current/) statements
-
-  * [minisrv.pl](./bin/minisrv.pl) - provides a control server to perform updates automatically
   
-These rely on the Perl modules in the [lib](./lib) directory. The machinery can be built locally by
-cloning the repo, cd'ing to the main directory, and executing:
+These rely on the Perl modules in the [lib](./lib) directory. The machinery can be built locally by cloning the repo, cd'ing to the main directory, and executing:
 	
-	curl -L https://cpanmin.us | perl - App::cpanminus
-	cpanm Module::Build
-	cpanm -n Time::Zone # avoids a current bug in TimeDate tests
-	perl Build.PL
-	./Build
-	./Build installdeps --cpan_client cpanm
-	./Build install
+    curl -L https://cpanmin.us | perl - App::cpanminus
+    cpanm Module::Build
+    cpanm -n Time::Zone # avoids a current bug in TimeDate tests
+    perl Build.PL
+    ./Build
+    ./Build installdeps --cpan_client cpanm
+    ./Build install
 	
-Using the Docker container is easier.
+
+Using Docker containers is easier.
 
 # Docker
+
+Set up a Neo4j instance running in a Docker container, using the
+community Neo4j images available on Docker Hub
+(https://hub.docker.com). Prime this instance with the Neo4j v4.4 [dump
+of the 2023-01-02 JOSS graph](./docker/jg.20230102.v4-4.dump.gz), by
+first creating a Neo4j database on your destination system, then
+pointing a Neo4j docker container at the database:
+
+    cd docker
+    export LOC=~/jg/neo4j/data # e.g.
+	mkdir -p $LOC
+    gunzip jg.20230102.v4-4.dump.gz
+    mv jg.20230102.v4-4.dump $LOC
+	# load dump into $LOC
+    docker run -v$LOC:/data --rm neo4j:4.4 \
+      neo4j-admin load --from=data/jg.20230102.v4-4.dump
+    docker run -d -p7474:7474 -p7473:7473 -p7687:7687 -v$LOC:/data \
+      --name jossgraph neo4j:4.4 
+
+Following these commands should provide a live database accessible at 
+http://localhost:7474.
+
+To update the database, run the following container:
+
+     docker run -d --rm \
+	   -e NEO_URL=localhost \
+	   -e GHCRED=ghp_XXXXXXXXX \
+	   -e NEOUSER=neo4j \
+	   -e NEOPASS=<password> \
+       maj1/jg_manager
+	   
+See [the cron directory](./cron) for scripts to perform this
+unattended at intervals.
+
+
+
+
+
 
 Run the following command to instantiate JOSS-graph in a container:
 
@@ -131,8 +179,6 @@ Run the following command to instantiate JOSS-graph in a container:
 
 Point a browser to https://localhost:7473 or http://localhost:7474 to explore the database.
 The neo4j instance is configured to be accessed without authentication.
-
-To update the database, perform a get request to http://localhost:3001/update. 
 
 Remove the `-p 3001:3001` option from the `docker run` command to hide the control server, and perform updates with the following command:
 

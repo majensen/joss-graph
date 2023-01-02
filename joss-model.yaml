@@ -68,39 +68,8 @@ Nodes:
     Props:
       - role
       - date
-  event:
-    Props:
-      - disposition
-      - updated_date
-  rev_snapshot:
-    Props:
-      - updated_date
-      - active
-      - all_time
-      - last_year
-      - last_quarter
 
 Relationships:
-  author_of:
-    Mul: many_to_many
-    Ends:
-      - Src: person
-        Dst: submission
-  reviewer_of:
-    Mul: many_to_many
-    Ends:
-      - Src: person
-        Dst: submission
-  editor_of:
-    Mul: one_to_many
-    Ends:
-      - Src: person
-        Dst: submission
-  eic_of:
-    Mul: one_to_many
-    Ends:
-      - Src: person
-        Dst: submission
   assigned_by:
     Mul: many_to_one
     Ends:
@@ -151,11 +120,6 @@ Relationships:
     Ends:
       - Src: submission
         Dst: topic
-  has_snapshot:
-    Mul: one_to_many
-    Ends:
-      - Src: person
-        Dst: rev_snapshot
   from_submission:
     Mul: one_to_one
     Ends:
@@ -166,28 +130,11 @@ Relationships:
     Ends:
       - Src: submission
         Dst: language
-  next:
-    Mul: one_to_one
-    Ends:
-      - Src: event
-        Dst: event
-  occurred_to:
-    Mul: many_to_one
-    Ends:
-      - Src: event
-        Dst: submission
-  updated_by:
-    Mul: one_to_one
-    Ends:
-      - Src: event
-        Dst: person
   has_topic:
     Mul: many_to_many
     Props:
       - gamma
     Ends:
-      - Src: paper
-        Dst: mtopic
       - Src: submission
         Dst: mtopic
   has_term:
@@ -248,7 +195,7 @@ PropDefinitions:
     Type:
       pattern: "^.+$" # better one
   archive_doi:
-    Desc: archive (like Zenodo)DOI
+    Desc: archive (like Zenodo) DOI
     Nul: true
     Type:
       pattern: ^.+$ # better one
@@ -256,16 +203,17 @@ PropDefinitions:
     Desc: Github or other url
     Req: true
     Type: url
-  prereview_issue:
-    Desc: joss_reviews prereview issue url
+  prereview_issue_number:
+    Desc: joss_reviews prereview issue number
     Req: true
-    Type: url
-  review_issue:
-    Desc: joss_reviews review issue url
+    Type: number
+  review_issue_number:
+    Desc: joss_reviews review issue number
     Nul: true
-    Type: url
-  issn:
+    Type: number
+  number:
     Desc: GitHub issue number
+    Req: true
     Type: integer
   gamma:
     Desc: document - mtopic weight
@@ -294,8 +242,6 @@ PropDefinitions:
       - withdrawn
       - rejected 
       - closed # issue closed but not labeled with official dispo
-      - prv_closed # issue closed but not labeled with official dispo
-      - rv_closed # issue closed but not labeled with official dispo
   url:
     Desc: a URL
     Type: url
