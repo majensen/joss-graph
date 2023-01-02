@@ -17,7 +17,9 @@ my $joss = JOSS->new();
 pretty_json;
 
 my $log = get_logger();
-$log->fh( build_channels( fh => \*STDERR, file_append => 'minisrv.log' ) );
+$log->fh( build_channels(
+  fh => \*STDERR,
+  file_append => $ENV{JGLOG} // 'jossgraph.log' ) );
 
 # last issue recorded in db:
 my $since_issn = $ENV{FROM_ISSUE} // $joss->latest_issn;

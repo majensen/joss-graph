@@ -14,7 +14,9 @@ use warnings;
 
 my $NORM_TO = 0.95;
 my $log = get_logger();
-$log->fh( build_channels( fh => \*STDERR, file_append => 'minisrv.log' ) );
+$log->fh( build_channels(
+  fh => \*STDERR,
+  file_append => $ENV{JGLOG} // 'jossgraph.log' ) );
 my $issues;
 my $fn = $ARGV[0];
 if ($fn) {
@@ -25,8 +27,10 @@ if ($fn) {
   };
 }
 else {
-  local $/;
-  $_ = <>;
+  {
+    local $/;
+    $_ = <>;
+  }
   parsej;
   $issues = J();
   if (!scalar keys %$issues) {
