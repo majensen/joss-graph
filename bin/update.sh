@@ -1,4 +1,5 @@
 #!/bin/bash
+rsyslogd
 # update jossgraph, push log into syslog
 curl http://$NEO_URL:7687
 if (( $? == 52 ))
