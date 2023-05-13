@@ -7,6 +7,7 @@ then
 	exit 0
     else
 	logger -p syslog.info -f /var/log/jglog/jossgraph.log
+	cat /var/log/jglog/jossgraph.log >> /var/log/jglog/jossgraph.raw.log
 	rm /var/log/jglog/jossgraph.log
     fi
 fi
