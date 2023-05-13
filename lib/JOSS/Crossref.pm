@@ -66,15 +66,15 @@ sub get_authors {
     for my $au ($r->first_descendant('contributors')->children) {
       my $p;
       next unless $au->has_children;
-      try {
+      if ($au->first_child('given_name')) {
 	$p->{first_name} = $au->first_child('given_name')->text;
+      }
+      if ($au->first_child('surname')) {
 	$p->{last_name} = $au->first_child('surname')->text;
-	if (my $ch = $au->first_child('orcid') // $au->first_child('ORCID')) {
-	  $p->{orcid} = $ch->text;
-	}
-      } catch {
-	$log->logcroak($_);
-      };
+      }
+      if (my $ch = $au->first_child('orcid') // $au->first_child('ORCID')) {
+	$p->{orcid} = $ch->text;
+      }
       push @{$self->{_authors}}, $p;
     }
   }
